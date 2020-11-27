@@ -14,7 +14,7 @@ const JOB_SPEC = {
 			"params": {
 				"name": INITIATOR_NAME,
 				"body": {
-					"address": ""
+					"address": "0xD9e637Ea079813e73D8Cbb8CEDfAfA616635a247"
 				}
 			}
 		}

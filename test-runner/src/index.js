@@ -43,7 +43,7 @@ function deploy(name, network, provider){
 		console.log(`[INFO] - Deploying ${name} contract...`);
 		// Run truffle migrate command from npm script
 		exec(`npm run deploy:${name.toLowerCase()}:${network}`, (error, stdout, stderr) => {
-			console.log(`[INFO] - Deploy of ${name} executed`);
+			console.log(`[INFO] - Deploy of ${name} executed, 'here`);
 			if (!error){
 				// If completed without errors, read the truffle artifacts file
 				loadArtifacts(name).then(contractArtifacts => {
