@@ -1,0 +1,19 @@
+FROM node:11.15.0
+
+RUN mkdir -p /home/qtumtx-adapter/src/node_modules
+RUN mkdir -p /home/chainlink-api-client/src
+
+COPY ./qtumtx-adapter/src/ /home/qtumtx-adapter/src/
+COPY ./chainlink-api-client/src/ /home/chainlink-api-client/
+COPY ./chainlink-api-client/package*.json /home/chainlink-api-client/
+
+RUN chown -R node:node /home/
+
+USER node
+
+WORKDIR /home/qtumtx-adapter/src
+
+RUN npm install 2>&1
+
+ENTRYPOINT ["npm"]
+CMD ["start"]
