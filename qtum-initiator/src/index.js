@@ -7,6 +7,7 @@ const fs = require('fs');
 const Web3 = require('web3');
 const db = require('./db.js');
 require('console-stamp')(console);
+const {Qweb3} = require('qweb3')
 
 // The OracleRequest event ABI for decoding the event logs
 const oracleRequestAbi = [{"indexed":true,"name":"specId","type":"bytes32"},{"indexed":false,"name":"requester","type":"address"},{"indexed":false,"name":"requestId","type":"bytes32"},{"indexed":false,"name":"payment","type":"uint256"},{"indexed":false,"name":"callbackAddr","type":"address"},{"indexed":false,"name":"callbackFunctionId","type":"bytes4"},{"indexed":false,"name":"cancelExpiration","type":"uint256"},{"indexed":false,"name":"dataVersion","type":"uint256"},{"indexed":false,"name":"data","type":"bytes"}];
@@ -16,22 +17,23 @@ const port = process.env.INITIATOR_PORT || 30055;
 const confirmations = process.env.MIN_INCOMING_CONFIRMATIONS || 2;
 
 let web3 = new Web3();
+let qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889')
 // The Subscriptions array holds the current job/oracle pairs that needs to be watched for events
 let Subscriptions = [];
 // The Events array holds the current event logs being processed for every jobId. Allows for chain reorg protection.
 let Events = [];
 
 // Setup different configurations if the project is running from inside a Docker container. If not, use defaults
-const RSK_NODE = {
-	protocol: process.env.RSK_WS_PROTOCOL || 'ws',
-	host: process.env.RSK_HOST || 'localhost',
-	port: process.env.RSK_WS_PORT || 4445,
-	url: process.env.RSK_WS_URL || '/websocket'
+const QTUM_NODE = {
+	protocol: 'http',
+	host: '0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost',
+	port: 23889,
+	url: ''
 };
-const RSK_CONFIG = {
-	'name': 'RSK',
+const QTUM_CONFIG = {
+	'name': 'QTUM',
 	'shortname': 'regtest',
-	'url': `${RSK_NODE.protocol}://${RSK_NODE.host}:${RSK_NODE.port}${RSK_NODE.url}`
+	'url': `${QTUM_NODE.protocol}://${QTUM_NODE.host}:${QTUM_NODE.port}`
 };
 
 // Initialize the Chainlink API Client without credentials, the initiator will login using the access key and secret
@@ -79,7 +81,7 @@ app.post("/initiator", async (req, res) => {
 				console.info(`Saving subscription...`);
 				await saveSubscription(req.body.jobId, req.body.params.address);
 
-				// Subscribe to RSK node for events from that Oracle corresponding to that new job id
+				// Subscribe to QTUM node for events from that Oracle corresponding to that new job id
 				newSubscription(req.body.jobId, req.body.params.address);
 
 				return res.sendStatus(200);
@@ -112,14 +114,14 @@ async function chainlinkAuth(outgoingAccessKey, outgoingSecret){
 	});
 }
 
-/* Configures the initiator with a web3 instance connected to a RSK network and tries to load the
+/* Configures the initiator with a web3 instance connected to a QTUM network and tries to load the
    subscriptions file and configuration file. */
 async function initiatorSetup(){
 	try {
-		// Configure the web3 instance connected to RSK network
-		web3 = await setupNetwork(RSK_CONFIG);
-		const chainId = await web3.eth.net.getId();
-		console.info(`Web3 is connected to the ${RSK_CONFIG.name} node. Chain ID: ${chainId}`);
+		// Configure the web3 instance connected to QTUM network
+		const qweb3 = await setupNetwork(QTUM_CONFIG);
+		const chainId = 'JANUS'
+		console.info(`Qweb3 is connected to the ${QTUM_CONFIG.name} node. Chain ID: ${chainId}`);
 
 		// Load the subscriptions from database
 		let subs = await loadSubscriptions();
@@ -170,17 +172,21 @@ async function loadSubscriptions(){
 	});
 }
 
-/* Subscribes to the RSK node for events emitted from the given Oracle address that contains a request
+/* Subscribes to the QTUM node for events emitted from the given Oracle address that contains a request
    for the specified job ID */
 async function newSubscription(jobId, oracleAddress){
 	console.info(`Subscribing to Oracle at ${oracleAddress} for requests to job ID ${jobId}...`);
-	const currentBlock = await web3.eth.getBlockNumber();
-	let subscription = web3.eth.subscribe('logs', {
-		address: oracleAddress,
-		fromBlock: web3.utils.toHex(currentBlock),
-		// Add the OracleRequest event signature and hex job Id to topics filter to get only the events for the specified job
-		topics: ['0xd8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.utf8ToHex(jobId)]
-	}).on('data', event => {
+	const currentBlock = await qweb3.getBlockCount()
+	console.log(currentBlock, 'HERE')
+	let sub = await qweb3.searchLogs(-1, null, '0xfFaA4f2C9E3C62B00529C0af122Cc18bf0e044E7')
+	console.log(sub, 'sub')
+	// let subscription = web3.eth.subscribe('logs', {
+	// 	address: oracleAddress,
+	// 	fromBlock: web3.utils.toHex(currentBlock),
+	// 	// Add the OracleRequest event signature and hex job Id to topics filter to get only the events for the specified job
+	// 	topics: ['0xd8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.utf8ToHex(jobId)]
+	// }).on('data', event => {
+if (sub) {
 		try {
 			console.info('Detected an Oracle Request event for job ' + jobId);
 			// If an array key is not present for this log Id, create one
@@ -211,16 +217,17 @@ async function newSubscription(jobId, oracleAddress){
 		}catch(e){
 			console.error(e);
 		}
-	}).on('changed', event => {
-		setTimeout(() => {
-			if (typeof Events[event.id] !== 'undefined' && event.removed == true){
-				console.info(`Detected a log change for job ${jobId}, will discard old log`);
-				Events[event.id].removed = true;
-			}
-		}, 500);
-	}).on('error', error => {
-		console.error(error);
-	});
+}
+	// }).on('changed', event => {
+	// 	setTimeout(() => {
+	// 		if (typeof Events[event.id] !== 'undefined' && event.removed == true){
+	// 			console.info(`Detected a log change for job ${jobId}, will discard old log`);
+	// 			Events[event.id].removed = true;
+	// 		}
+	// 	}, 500);
+	// }).on('error', error => {
+	// 	console.error(error);
+	// });
 }
 
 /* Saves a new subscription to database */
@@ -274,32 +281,11 @@ async function setupCredentials(){
 /* Creates a new web3 instance connected to the specified network */
 function setupNetwork(node){
 	return new Promise(async function(resolve, reject){
-		console.info(`Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
-		// Wrap the process in a function to be able to call it again if can't connect
-		(function tryConnect() {
-			const wsOptions = {
-				clientConfig: {
-					keepAlive: true,
-					keepaliveInterval: 20000
-				},
-				reconnect: {
-					auto: true,
-					delay: 5000, // ms
-					onTimeout: false
-				}
-			};
-			const wsProvider = new Web3.providers.WebsocketProvider(node.url, wsOptions);
-			web3.setProvider(wsProvider);
-			// Check connection with isListening()
-			web3.eth.net.isListening().then(() => {
-				resolve(web3);
-			}).catch(e => {
-				// If error, print it and try to connect again after 10 seconds
-				console.error(`Could not connect to ${node.name} node, retrying in 10 seconds...`)			
-				console.error(e);
-				setTimeout(tryConnect, 10000);
-			});
-		})();
+		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
+		const qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889');
+		qweb3.isConnected().then((isConnected) => {
+			resolve(qweb3)
+		})
 	}).catch(e => {
 		reject(e);
 	});
@@ -321,7 +307,7 @@ async function triggerJobRun(event, jobId, oracleAddress){
 	}else{
 		clReq = {};
 	}
-	/* Add to the request some custom parameters destined for the RSK TX adapter:
+	/* Add to the request some custom parameters destined for the QTUM TX adapter:
 	   @address is the address of the Oracle contract that the adapter has to call
 	   @dataPrefix is the encoded parameters that the adapter will need to call the Oracle
 	   @functionSelector is the selector of the Oracle fulfill function */
@@ -346,7 +332,7 @@ async function triggerJobRun(event, jobId, oracleAddress){
 }
 
 const server = app.listen(port, async function() {
-	console.info(`RSK Initiator listening on port ${port}!`);
+	console.info(`QTUM Initiator listening on port ${port}!`);
 	try {
 		await setupCredentials();
 	}catch(e){

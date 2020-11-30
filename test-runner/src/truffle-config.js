@@ -9,14 +9,14 @@ const eth = {
 	port: process.env.ETHEREUM_WS_PORT || 8546,
 	url: process.env.ETHEREUM_WS_URL || '/'
 }
-const rsk = {
-	host: process.env.RSK_HOST || 'localhost',
-	port: process.env.RSK_PORT || 4444,
-	url: process.env.RSK_URL || '/2.0.1'
+const qtum = {
+	host: process.env.QTUM_HOST || 'localhost',
+	port: process.env.QTUM_PORT || 4444,
+	url: process.env.QTUM_URL || '/2.0.1'
 }
 
 const eth_url = `ws://${eth.host}:${eth.port}${eth.url}`;
-const rsk_url = `http://${rsk.host}:${rsk.port}${rsk.url}`;
+const qtum_url = `http://${qtum.host}:${qtum.port}${qtum.url}`;
 
 /* Truffle config object */
 module.exports = {
@@ -32,11 +32,11 @@ module.exports = {
 		},
 
 		fund_regtest: {
-			host: rsk.host,
-			port: rsk.port,
+			host: qtum.host,
+			port: qtum.port,
 			network_id: "*",
 			gas: 5000000,
-			url: rsk_url
+			url: qtum_url
 		},
 
 		gethdev: {
@@ -48,10 +48,10 @@ module.exports = {
 		},
 
 		regtest: {
-			provider: () => new HDWalletProvider(deployerKey, rsk_url),
+			provider: () => new HDWalletProvider(deployerKey, qtum_url),
 			network_id: "*",
 			gas: 5000000,
-			url: rsk_url
+			url: qtum_url
 		}
 	},
 	compilers: {

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "qtumjs": "ceoimon/qtumjs-eth#master"
+  }
+}

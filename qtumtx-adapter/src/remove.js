@@ -2,7 +2,7 @@ const ChainlinkAPIClient = require('chainlink-api-client');
 const fs = require('fs');
 const db = require('./db.js');
 
-const ADAPTER_NAME = 'rsktxadapter';
+const ADAPTER_NAME = 'qtumtxadapter';
 
 let chainlinkEmail, chainlinkPass;
 [ chainlinkEmail, chainlinkPass ] = fs.readFileSync('./.api', 'utf8').trim().split("\n");
@@ -20,7 +20,7 @@ async function runUninstall(){
 	const result = await chainlink.deleteBridge(ADAPTER_NAME);
 	if (!result.errors){
 		if (typeof result.data !== 'undefined'){
-			console.log('[INFO] - RSK TX Adapter successfully removed from Chainlink node.');
+			console.log('[INFO] - QTUM TX Adapter successfully removed from Chainlink node.');
 		}else{
 			console.log(result);
 		}

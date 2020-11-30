@@ -4,21 +4,21 @@ const contract = require('@truffle/contract');
 const external = require('./external.js');
 const fs = require('fs');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const Web3 = require('web3');
+const qtum3 = require("qtumjs")
 
 const TESTER_PRIVATE_KEY = fs.readFileSync(".testerKey").toString().trim();
 const CONTRACTS_BUILD_DIRECTORY = process.env.CONTRACTS_BUILD_DIRECTORY || './build/contracts';
 const JOB_FILE = 'job.json';
-const RSK_NODE = {
-	protocol: process.env.RSK_WS_PROTOCOL || 'ws',
-	host: process.env.RSK_HOST || 'localhost',
-	port: process.env.RSK_WS_PORT || 4445,
-	url: process.env.RSK_WS_URL || '/websocket'
+const QTUM_NODE = {
+	protocol: 'http',
+	host: '0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost',
+	port: 23889,
+	url: ''
 };
-const RSK_CONFIG = {
-	'name': 'RSK',
+const QTUM_CONFIG = {
+	'name': 'QTUM',
 	'shortname': 'regtest',
-	'url': `${RSK_NODE.protocol}://${RSK_NODE.host}:${RSK_NODE.port}${RSK_NODE.url}`
+	'url': `${QTUM_NODE.protocol}://${QTUM_NODE.host}:${QTUM_NODE.port}`
 };
 
 let chainlinkEmail, chainlinkPass;
@@ -118,37 +118,38 @@ async function initCore(oracleAddress){
 }
 
 /* The main function of the tester. It initializes the testing environment, first deploying a SideToken contract and
-   an Oracle contract. Then configures the Chainlink node, creating a job that uses the RSK Initiator and RSK TX adapter.
+   an Oracle contract. Then configures the Chainlink node, creating a job that uses the QTUM Initiator and QTUM TX adapter.
    Once the Chainlink node is ready, it deploys a Consumer contract configured with the previously deployed SideToken and
    Oracle contracts, and the previously created job. Then mints tokens and send some to the Consumer contract. Finally it
    calls the requestRIFPrice of the Consumer contract and then polls for current price. */
 async function initTestRunner(){
 	try {
-		// Connect web3 with RSK network
-		const web3 = await setupNetwork(RSK_CONFIG);
-		const chainId = await web3.eth.net.getId();
-		console.log(`[INFO] - Web3 is connected to the ${RSK_CONFIG.name} node. Chain ID: ${chainId}`);
+		// Connect web3 with QTUM network
+		const web3 = await setupNetwork(QTUM_CONFIG);
+		console.log(web3.eth.getAccounts())
+		const chainId = 'QTUM'
+		console.log(`[INFO] - Web3 is connected to the ${QTUM_CONFIG.name} node. Chain ID: ${chainId}`);
 		
 		// Deploy SideToken or instantiate previously deployed contract
-		const SideToken_v1 = await setupContract('SideToken_v1', RSK_CONFIG, chainId, web3.currentProvider);
-		console.log(`[INFO] - Deployed SideToken_v1 contract address in ${RSK_CONFIG.name} network is: ${SideToken_v1.address}`);
+		const SideToken_v1 = await setupContract('SideToken_v1', QTUM_CONFIG, chainId, web3.currentProvider);
+		console.log(`[INFO] - Deployed SideToken_v1 contract address in ${QTUM_CONFIG.name} network is: ${SideToken_v1.address}`);
 
 		// Deploy Oracle or instantiate previously deployed contract
-		const Oracle = await setupContract('Oracle', RSK_CONFIG, chainId, web3.currentProvider);
-		console.log(`[INFO] - Deployed Oracle contract address in ${RSK_CONFIG.name} network is: ${Oracle.address}`);
+		const Oracle = await setupContract('Oracle', QTUM_CONFIG, chainId, web3.currentProvider);
+		console.log(`[INFO] - Deployed Oracle contract address in ${QTUM_CONFIG.name} network is: ${Oracle.address}`);
 
 		// Configure Chainlink node
 		const chainlinkData = await setupChainlinkNode(Oracle.address);
 
 		// Deploy Consumer or instantiate previously deployed contract
-		const Consumer = await setupContract('Consumer', RSK_CONFIG, chainId, web3.currentProvider);
-		console.log(`[INFO] - Deployed Consumer contract address in ${RSK_CONFIG.name} network is: ${Consumer.address}`);
+		const Consumer = await setupContract('Consumer', QTUM_CONFIG, chainId, web3.currentProvider);
+		console.log(`[INFO] - Deployed Consumer contract address in ${QTUM_CONFIG.name} network is: ${Consumer.address}`);
 
 		// Check if Consumer contract has tokens, if not, mint and fund it
 		const consumerBalance = await SideToken_v1.balanceOf(Consumer.address);
 		if (consumerBalance == "0"){
-			await mint(RSK_CONFIG.shortname);
-			await fundConsumer(RSK_CONFIG.shortname);
+			await mint(QTUM_CONFIG.shortname);
+			await fundConsumer(QTUM_CONFIG.shortname);
 		}
 
 		const accounts = await web3.eth.getAccounts();
@@ -327,42 +328,11 @@ function setupNetwork(node){
 	return new Promise(async function(resolve, reject){
 		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
 		// Wrap the process in a function to be able to call it again if can't connect
-		(function tryConnect() {
-			const wsOptions = {
-				clientConfig: {
-					keepAlive: true,
-					keepaliveInterval: 20000
-				},
-				reconnect: {
-					auto: true,
-					delay: 5000, // ms
-					maxAttempts: 5,
-					onTimeout: false
-				}
-			};
-			let web3_tmp = new Web3();
-			let web3 = new Web3();
-			// First use WebsocketProvider
-			const wsProvider = new Web3.providers.WebsocketProvider(node.url, wsOptions);
-			// Pass the 'on' event listeners from WebsocketProvider to HDWalletProvider
-			HDWalletProvider.prototype.on = wsProvider.on.bind(wsProvider);
-			// Set the WebsocketProvider as provider and check connection with isListening()
-			web3_tmp.setProvider(wsProvider);
-			web3_tmp.eth.net.isListening().then(() => {
-				// Once the connection is established, use HDWalletProvider as provider
-				// to be able to use the tester service private key, and wrap it around de wsProvider
-				const provider = new HDWalletProvider(TESTER_PRIVATE_KEY, wsProvider);
-				// Set the new provider, clear temporary web3 and resolve
-				web3.setProvider(provider);
-				web3_tmp = null;
-				resolve(web3);
-			}).catch(e => {
-				// If error, print it and try to connect again after 10 seconds
-				console.error(`[ERROR] - Could not connect to ${node.name} node, retrying in 10 seconds...`)
-				console.error(e);
-				setTimeout(tryConnect, 10000);
-			});
-		})();
+		// const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
+		const web3 = new qtum3.EthRPC('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889', '0x7926223070547d2d15b2ef5e7383e541c338ffe9')
+
+		// let qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889');
+		resolve(web3)
 	}).catch(e => {
 		reject(e);
 	});

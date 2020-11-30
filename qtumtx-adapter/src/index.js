@@ -6,6 +6,7 @@ const db = require('./db.js');
 const fs = require('fs');
 const rskUtils = require('rskjs-util');
 const Web3 = require('web3');
+const {Qweb3} = require('qweb3')
 require('console-stamp')(console);
 
 const adapterKey = fs.readFileSync(".adapterKey").toString().trim();
@@ -18,15 +19,15 @@ let currentNonce;
 
 // Setup different configurations if the project is running from inside a Docker container. If not, use defaults
 const QTUM_NODE = {
-	protocol: process.env.QTUM_WS_PROTOCOL || 'ws',
-	host: process.env.QTUM_HOST || 'localhost',
-	port: process.env.QTUM_WS_PORT || 4445,
-	url: process.env.QTUM_WS_URL || '/websocket'
+	protocol: 'http',
+	host: '0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost',
+	port: 23889,
+	url: ''
 };
 const QTUM_CONFIG = {
 	'name': 'QTUM',
 	'shortname': 'regtest',
-	'url': `${QTUM_NODE.protocol}://${QTUM_NODE.host}:${QTUM_NODE.port}${QTUM_NODE.url}`
+	'url': `${QTUM_NODE.protocol}://${QTUM_NODE.host}:${QTUM_NODE.port}`
 };
 
 // Initialize the Chainlink API Client without credentials, the adapter will login using the token
@@ -90,22 +91,22 @@ app.post("/adapter", async (req, res) => {
 	}
 });
 
-/* Configures the adapter with a web3 instance connected to a RSK network and sets up the adapter's wallet */
+/* Configures the adapter with a web3 instance connected to a QTUM network and sets up the adapter's wallet */
 async function adapterSetup(){
 	try {
 		// Configures the web3 instance connected to RSK network
-		web3 = await setupNetwork(RSK_CONFIG);
-		const chainId = await web3.eth.net.getId();
-		console.info(`Web3 is connected to the ${RSK_CONFIG.name} node. Chain ID: ${chainId}`);
+		const qweb3 = await setupNetwork(QTUM_CONFIG);
+		const chainId = 'JANUS';
+		console.info(`Qweb3 is connected to the ${QTUM_CONFIG.name} node. Chain ID: ${chainId}`);
 
 		// Import the adapter private key to web3 wallets and make it the default account
-		web3.eth.accounts.wallet.add({privateKey: '0x' + adapterKey});
-		web3.defaultAccount = web3.eth.accounts.wallet[0].address;
+		// web3.eth.accounts.wallet.add({privateKey: '0x' + adapterKey});
+		// web3.defaultAccount = web3.eth.accounts.wallet[0].address;
 		// Initialize currentNonce variable with current account's TX count
-		currentNonce = await web3.eth.getTransactionCount(web3.defaultAccount, 'pending');
+		// currentNonce = await web3.eth.getTransactionCount(web3.defaultAccount, 'pending');
 		// find QTUM toChecksumAddress function and replace here
 		// console.info(`Adapter account address RSK Checksum: ${rskUtils.toChecksumAddress(web3.defaultAccount, chainId)}`);
-		console.info(`Adapter account address ETH Checksum: ${web3.utils.toChecksumAddress(web3.defaultAccount)}`);
+		// console.info(`Adapter account address ETH Checksum: ${web3.utils.toChecksumAddress(web3.defaultAccount)}`);
 	}catch(e){
 		console.error('Adapter setup failed:' + e);
 	}
@@ -130,7 +131,7 @@ async function chainlinkAuth(outgoingToken){
 
 /* Fulfills a Chainlink request sending the given data to the specified address.
    functionSelector and dataPrefix params are optional, but if the request comes
-   from the RSK Initiator, they are surely present */
+   from the QTUM Initiator, they are surely present */
 async function fulfillRequest(req){
 	return new Promise(async function(resolve, reject){
 		try {
@@ -155,6 +156,7 @@ async function fulfillRequest(req){
 			// Increment nonce for the next TX
 			currentNonce++;
 			// Sign the transaction with the adapter's private key
+			// replace with qweb3 sign transaction
 			const signed = await web3.eth.accounts.signTransaction(tx, adapterKey);
 			// Send the signed transaction and resolve the TX hash, only if the transaction
 			// succeeded and events were emitted. If not, reject with tx receipt
@@ -275,39 +277,18 @@ async function setupCredentials(){
 /* Creates a new web3 instance connected to the specified network */
 function setupNetwork(node){
 	return new Promise(async function(resolve, reject){
-		console.info(`Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
-		// Wrap the process in a function to be able to call it again if can't connect
-		(function tryConnect() {
-			const wsOptions = {
-				clientConfig: {
-					keepAlive: true,
-					keepaliveInterval: 20000
-				},
-				reconnect: {
-					auto: true,
-					delay: 5000, // ms
-					onTimeout: false
-				}
-			};
-			const wsProvider = new Web3.providers.WebsocketProvider(node.url, wsOptions);
-			web3.setProvider(wsProvider);
-			// Check connection with isListening()
-			web3.eth.net.isListening().then(() => {
-				resolve(web3);
-			}).catch(e => {
-				// If error, print it and try to connect again after 10 seconds
-				console.error(`Could not connect to ${node.name} node, retrying in 10 seconds...`)
-				console.error(e);
-				setTimeout(tryConnect, 10000);
-			});
-		})();
+		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
+		const qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889');
+		qweb3.isConnected().then((isConnected) => {
+			resolve(qweb3)
+		})
 	}).catch(e => {
 		reject(e);
 	});
 }
 
 const server = app.listen(port, async function() {
-	console.info(`RSK TX Adapter listening on port ${port}!`);
+	console.info(`QTUM TX Adapter listening on port ${port}!`);
 	try {
 		await setupCredentials();
 	}catch(e){

@@ -1,10 +1,10 @@
 {
 	"name": "test-runner",
 	"version": "0.0.5",
-	"description": "Test runner for the Chainlink-RSK integration that deploys the contracts, configures the Chainlink node and requests data to a Consumer contract",
+	"description": "Test runner for the Chainlink-qtum integration that deploys the contracts, configures the Chainlink node and requests data to a Consumer contract",
 	"scripts": {
 		"dev": "npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
-		"setup:regtest": "npm run fund:rsk && npm run deploy:migrations:rsk && npm run deploy:sidetoken:rsk && npm run deploy:oracle:rsk && npm run deploy:client:rsk",
+		"setup:regtest": "npm run fund:qtum && npm run deploy:migrations:qtum && npm run deploy:sidetoken:qtum && npm run deploy:oracle:qtum && npm run deploy:client:qtum",
 		"start": "node index.js",
 		"test": "npx truffle test",
 		"deploy:sidetoken_v1:regtest": "npx truffle migrate --f 1 --to 2 --network regtest",

@@ -1,10 +1,12 @@
 ignored/
 node_modules/
-rsk-initiator/src/.api
-rsk-initiator/.env-testnet
-rsktx-adapter/src/.api
-rsktx-adapter/.env-testnet
+qtum-initiator/src/.api
+qtum-initiator/.env-testnet
+qtumtx-adapter/src/.api
+qtumtx-adapter/.env-testnet
 test-runner/src/job.json
 testnet-deploy/.deployerKey
 testnet-deploy/build
 testnet-deploy/package-lock.json
+.adapterKey
+.api

@@ -7,7 +7,7 @@ require('console-stamp')(console);
 const web3 = new Web3();
 
 const INITIATOR_HOST = process.env.INITIATOR_HOST || 'localhost';
-const INITIATOR_NAME = process.env.INITIATOR_NAME || 'rskinitiator';
+const INITIATOR_NAME = process.env.INITIATOR_NAME || 'qtuminitiator';
 const INITIATOR_PORT = process.env.INITIATOR_PORT || 30055;
 const INITIATOR_URL = `http://${INITIATOR_HOST}:${INITIATOR_PORT}/initiator`;
 

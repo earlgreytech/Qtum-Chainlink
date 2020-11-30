@@ -1,19 +1,22 @@
 {
-	"name": "qtumtx-adapter",
-	"version": "0.1.0",
-	"description": "External adapter for Chainlink that takes the input sent by Chainlink, and sends a transaction with that data to an address on a QTUM network.",
+	"name": "qtum-initiator",
+	"version": "0.1.1",
+	"description": "External initiator for Chainlink that triggers a Job Run based on log events from an Oracle deployed in QTUM network.",
 	"scripts": {
 		"start": "node index.js",
 		"dev": "npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
 		"setup": "node setup.js",
-		"remove": "node remove.js"
+		"remove": "node remove.js",
+		"delsubs": "node delsubs.js"
 	},
 	"dependencies": {
+		"body-parser": "^1.19.0",
+		"cbor": "^5.0.2",
 		"chainlink-api-client": "file:../../chainlink-api-client",
 		"console-stamp": "^0.2.9",
 		"express": "^4.17.1",
 		"pg": "^8.3.0",
-		"rskjs-util": "^1.0.3",
+		"qweb3": "^1.2.2",
 		"web3": "^1.2.7"
 	},
 	"devDependencies": {

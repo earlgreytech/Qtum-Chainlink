@@ -2,10 +2,34 @@ version: '3.5'
 
 x-db-env:
   &db-login-data
-  POSTGRES_MULTIPLE_DATABASES: "chainlink_dev,rsk_initiator,rsktx_adapter"
+  POSTGRES_MULTIPLE_DATABASES: "chainlink_dev,qtum_initiator,qtumtx_adapter"
   POSTGRES_PASSWORD: chainlink
 
 services:
+  janus:
+    image: qtum/janus:dev
+    build: 
+        context: ./docker/standalone/
+        cache_from:
+          - golang:1.14-alpine
+          - qtum/janus:dev
+    ports:
+        - "23889:23889"
+    environment: 
+        - QTUM_RPC=http://qtum:testpasswd@qtum:3889
+    volumes:
+        - ./docker/standalone/myaccounts.txt:/go/myaccounts.txt
+    depends_on:
+      - qtum
+    command: --bind 0.0.0.0 --accounts myaccounts.txt --dev
+  qtum:
+    container_name: qtum
+    ports:
+      - "3889:3889"
+      - "3890:3890"
+    image: qtum/qtum:latest
+    # container_name: qtum_testchain
+    command: qtumd -regtest  -rpcbind=0.0.0.0:3889 -rpcallowip=0.0.0.0/0 -logevents -rpcuser=qtum -rpcpassword=testpasswd -deprecatedrpc=accounts -printtoconsole
   postgres-server:
     container_name: postgres-server
     build: ./docker/postgres-server
@@ -25,15 +49,15 @@ services:
       - geth-db-data:/gethnet/datadir/geth
     secrets:
       - eth_node_passw
-  rsk-node:
-    container_name: rsk-node
-    build: ./docker/rsk-node
-    ports:
-      - 4444:4444
-      - 4445:4445
-      - 30305:30305
-    volumes:
-      - rsk-db-data:/var/lib/rsk/database/regtest
+  # rsk-node:
+  #   container_name: rsk-node
+  #   build: ./docker/rsk-node
+  #   ports:
+  #     - 4444:4444
+  #     - 4445:4445
+  #     - 30305:30305
+  #   volumes:
+  #     - rsk-db-data:/var/lib/rsk/database/regtest
   chainlink-node:
     container_name: chainlink-node
     build: ./docker/chainlink-node
@@ -52,51 +76,51 @@ services:
       - chainlink_secret
       - chainlink_api
       - chainlink_key
-  rsk-initiator:
-    container_name: rsk-initiator
+  qtum-initiator:
+    container_name: qtum-initiator
     build:
       context: .
-      dockerfile: ./rsk-initiator/Dockerfile
+      dockerfile: ./qtum-initiator/Dockerfile
     env_file:
-      - ./rsk-initiator/.env
+      - ./qtum-initiator/.env
     depends_on:
-      - rsk-node
+      - qtum
     links:
-      - "rsk-node"
+      - "qtum"
     ports:
       - 30055:30055
     secrets:
       - source: chainlink_api
-        target: /home/rsk-initiator/src/.api
+        target: /home/qtum-initiator/src/.api
     volumes:
-      - ./rsk-initiator/src:/home/rsk-initiator/src
+      - ./qtum-initiator/src:/home/qtum-initiator/src
       - ./chainlink-api-client/src:/home/chainlink-api-client/src
-      - initiator-modules:/home/rsk-initiator/node_modules
+      - initiator-modules:/home/qtum-initiator/node_modules
       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
-      - shared-volume:/home/rsk-initiator/config
-  rsktx-adapter:
-    container_name: rsktx-adapter
+      - shared-volume:/home/qtum-initiator/config
+  qtumtx-adapter:
+    container_name: qtumtx-adapter
     build:
       context: .
-      dockerfile: ./rsktx-adapter/Dockerfile
+      dockerfile: ./qtumtx-adapter/Dockerfile
     env_file:
-      - ./rsktx-adapter/.env
+      - ./qtumtx-adapter/.env
     depends_on:
-      - rsk-node
+      - qtum
     links:
-      - "rsk-node"
+      - "qtum"
     ports:
       - 30056:30056
     secrets:
       - adapter_key
       - source: chainlink_api
-        target: /home/rsktx-adapter/src/.api
+        target: /home/qtumtx-adapter/src/.api
     volumes:
-      - ./rsktx-adapter/src:/home/rsktx-adapter/src
+      - ./qtumtx-adapter/src:/home/qtumtx-adapter/src
       - ./chainlink-api-client/src:/home/chainlink-api-client/src
-      - adapter-modules:/home/rsktx-adapter/node_modules
+      - adapter-modules:/home/qtumtx-adapter/node_modules
       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
-      - shared-volume:/home/rsktx-adapter/config
+      - shared-volume:/home/qtumtx-adapter/config
   test-runner:
     container_name: test-runner
     build:
@@ -105,13 +129,13 @@ services:
     env_file:
       - ./test-runner/.env
     depends_on:
-      - rsk-node
-      - rsk-initiator
-      - rsktx-adapter
+      - qtum
+      - qtum-initiator
+      - qtumtx-adapter
     links:
-      - "rsk-node"
-      - "rsk-initiator"
-      - "rsktx-adapter"
+      - "qtum"
+      - "qtum-initiator"
+      - "qtumtx-adapter"
     secrets:
       - adapter_key
       - chainlink_api
@@ -124,7 +148,7 @@ services:
        - shared-volume:/home/test-runner/config:z
 secrets:
   adapter_key:
-    file: ./rsktx-adapter/src/.adapterKey
+    file: ./qtumtx-adapter/src/.adapterKey
   chainlink_secret:
     file: ./docker/chainlink-node/.secret
   chainlink_api:
@@ -140,6 +164,6 @@ volumes:
   db-data:
   geth-db-data:
   initiator-modules:
-  rsk-db-data:
+  qtum-db-data:
   runner-modules:
   shared-volume:

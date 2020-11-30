@@ -7,7 +7,7 @@ require('console-stamp')(console);
 const web3 = new Web3();
 
 const ADAPTER_HOST = process.env.ADAPTER_HOST || 'localhost';
-const ADAPTER_NAME = process.env.ADAPTER_NAME || 'rsktxadapter';
+const ADAPTER_NAME = process.env.ADAPTER_NAME || 'qtumtxadapter';
 const ADAPTER_PORT = process.env.ADAPTER_PORT || 30056;
 const ADAPTER_URL = `http://${ADAPTER_HOST}:${ADAPTER_PORT}/adapter`;
 
