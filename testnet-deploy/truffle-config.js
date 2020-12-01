@@ -3,19 +3,18 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 const deployerKey = fs.readFileSync(".deployerKey").toString().trim();
 const Web3 = require('web3');
 
-const rskNode = 'YOUR_NODE_RPC_URL';
+// const rskNode = 'YOUR_NODE_RPC_URL';
 
 /* Truffle config object */
 module.exports = {
 	contracts_directory: '../test-runner/src/contracts',
 	networks: {
-		rskTestnet: {
-			provider: () => new HDWalletProvider(deployerKey, rskNode),
-			network_id: 31,
-			networkChecktimeout: 10000,
-			gas: 5000000,
-			url: rskNode
-		}
+		qtum: {
+			host: '127.0.0.1',
+			port: 23889, // janus QTUM-ETH RPC bridge
+			network_id: '*', // eslint-disable-line camelcase
+			from: '0x7926223070547d2d15b2ef5e7383e541c338ffe9',
+			gasPrice: '0x64', // minimal gas for qtum
 	},
 	compilers: {
 		solc: {

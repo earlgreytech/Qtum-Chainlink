@@ -8,6 +8,10 @@ const rskUtils = require('rskjs-util');
 const Web3 = require('web3');
 const {Qweb3} = require('qweb3')
 require('console-stamp')(console);
+const qtum = require("qtumjs")
+const rpcURL =  'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:23889';
+const qtumAccount  = url.parse(rpcURL).auth.split(":")[0]
+const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 
 const adapterKey = fs.readFileSync(".adapterKey").toString().trim();
 const app = express();
@@ -97,16 +101,9 @@ async function adapterSetup(){
 		// Configures the web3 instance connected to RSK network
 		const qweb3 = await setupNetwork(QTUM_CONFIG);
 		const chainId = 'JANUS';
-		console.info(`Qweb3 is connected to the ${QTUM_CONFIG.name} node. Chain ID: ${chainId}`);
-
-		// Import the adapter private key to web3 wallets and make it the default account
-		// web3.eth.accounts.wallet.add({privateKey: '0x' + adapterKey});
-		// web3.defaultAccount = web3.eth.accounts.wallet[0].address;
+		console.info(`QTUM RPC is connected to the ${QTUM_CONFIG.name} node. Chain ID: ${chainId}`);
 		// Initialize currentNonce variable with current account's TX count
-		// currentNonce = await web3.eth.getTransactionCount(web3.defaultAccount, 'pending');
-		// find QTUM toChecksumAddress function and replace here
-		// console.info(`Adapter account address RSK Checksum: ${rskUtils.toChecksumAddress(web3.defaultAccount, chainId)}`);
-		// console.info(`Adapter account address ETH Checksum: ${web3.utils.toChecksumAddress(web3.defaultAccount)}`);
+		currentNonce = await rpc.getTransactionCount('qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW', 'latest');
 	}catch(e){
 		console.error('Adapter setup failed:' + e);
 	}
@@ -134,7 +131,6 @@ async function chainlinkAuth(outgoingToken){
    from the QTUM Initiator, they are surely present */
 async function fulfillRequest(req){
 	return new Promise(async function(resolve, reject){
-		try {
 			let functionSelector = '', dataPrefix = '', encodedFulfill = '0x';
 			if (typeof req.functionSelector !== 'undefined'){
 				functionSelector = req.functionSelector.slice(2);
@@ -144,7 +140,7 @@ async function fulfillRequest(req){
 			}
 			// Concatenate the data
 			encodedFulfill += functionSelector + dataPrefix + req.result.slice(2);
-			const gasPrice = parseInt(await web3.eth.getGasPrice() * 1.3);
+			const gasPrice = parseInt(await rpc.getGasPrice() * 1.3);
 			// TX params
 			const tx = {
 				gas: 500000,
@@ -156,41 +152,36 @@ async function fulfillRequest(req){
 			// Increment nonce for the next TX
 			currentNonce++;
 			// Sign the transaction with the adapter's private key
-			// replace with qweb3 sign transaction
-			const signed = await web3.eth.accounts.signTransaction(tx, adapterKey);
+			const signed = await rpc.rawCall('signTransaction', [{...tx}, adapterKey])
 			// Send the signed transaction and resolve the TX hash, only if the transaction
 			// succeeded and events were emitted. If not, reject with tx receipt
-			web3.eth.sendSignedTransaction(signed.rawTransaction)
-			.on('receipt', function(receipt){
-				console.info('Fulfill Request TX has been mined: ' + receipt.transactionHash);
-				if ((typeof receipt.status !== 'undefined' && receipt.status == true) && (typeof receipt.logs !== 'undefined' && receipt.logs.length > 0)){
-					// TODO: Save transaction history to database
-					resolve(receipt.transactionHash);
-				}else{
-					reject(receipt);
-				}
-			}).on('transactionHash', async function(hash){
-				console.info(`Transaction ${hash} is in TX Pool`);
-			}).on('error', async function(e){
-				// If the nonce counter is wrong, correct it and try again
-				if (e.toString().indexOf('nonce too high') > -1 || e.toString().indexOf('Transaction was not mined within') > -1 || e.toString().indexOf('nonce too low') > -1 ){
-					console.info('There was a nonce mismatch, will correct it and try again...');
-					currentNonce = await web3.eth.getTransactionCount(web3.defaultAccount, 'pending');
-					fulfillRequest(req).then(tx => {
-						resolve(tx);
-					}).catch(e => {
-						reject(e);
-					});
-				}else{
+			rpc.sendTransaction(signed).then((txid) => {
+				rpc.getTransactionReceipt(txid).then((receipt) => {
+					console.info('Fulfill Request TX has been mined: ' + receipt.transactionHash);
+					if ((typeof receipt.status !== 'undefined' && receipt.status == true) && (typeof receipt.logs !== 'undefined' && receipt.logs.length > 0)){
+						// TODO: Save transaction history to database
+						console.info(`Transaction ${receipt.transactionHash} is in TX Pool`);
+						resolve(receipt.transactionHash);
+					}else{
+						reject(receipt);
+					}
+				})
+			}).catch(async function (e) {
+			// If the nonce counter is wrong, correct it and try again
+			if (e.toString().indexOf('nonce too high') > -1 || e.toString().indexOf('Transaction was not mined within') > -1 || e.toString().indexOf('nonce too low') > -1 ){
+				console.info('There was a nonce mismatch, will correct it and try again...');
+				currentNonce = await rpc.getTransactionCount('qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW', 'pending');
+				fulfillRequest(req).then(tx => {
+					resolve(tx);
+				}).catch(e => {
 					reject(e);
-				}
-			});
-		}catch(e){
-			reject(e);
+				});
+			}else{
+				reject(e);
+			}
+			})
 		}
-	});
-}
-
+	)}
 /* Reads the database and returns the Chainlink Node auth data */
 function loadCredentials(){
 	return new Promise(async function (resolve, reject){
@@ -278,12 +269,11 @@ async function setupCredentials(){
 function setupNetwork(node){
 	return new Promise(async function(resolve, reject){
 		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
-		const qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889');
-		qweb3.isConnected().then((isConnected) => {
-			resolve(qweb3)
+		rpc.getBlockNumber().then((value) => {
+			resolve(rpc)
+		}).catch((e) => {
+			console.log(e)
 		})
-	}).catch(e => {
-		reject(e);
 	});
 }
 
