@@ -1,13 +1,16 @@
 {
 	"name": "testnet-deploy",
 	"version": "0.0.1",
-	"description": "Deploy Oracle to RSK Testnet",
+	"description": "Deploy Oracle to QTUM Testnet",
 	"scripts": {
 		"test": "npx truffle test"
 	},
 	"dependencies": {
 		"@truffle/contract": "^4.2.3",
 		"@truffle/hdwallet-provider": "^1.0.34",
+		"minimist": "^1.2.5",
+		"ora": "^5.1.0",
+		"qtumjs": "ceoimon/qtumjs-eth#master",
 		"truffle": "5.1.8"
 	},
 	"devDependencies": {}

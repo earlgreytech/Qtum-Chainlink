@@ -1,13 +1,16 @@
 /* Script that requests RIF/BTC price to the Consumer contract */
-
 const Consumer = artifacts.require("Consumer");
+
+// NEED TO WRITE CONSUMER CONTRACT HERE TO INTERACT WITH VIA TRUFFLE, DEPLOYED TO QTUM
 
 module.exports = async function(callback) {
 	try {
 		const consumer = await Consumer.deployed();
-		const payment = "1000000000000000000";
+		const payment = "0";
 		console.log('[INFO] - Requesting RIF Price...');
 		const result = await consumer.requestRIFPrice(payment);
+
+		const confirmation = result.confirm(1)
 		// Watch for the RequestFulfilled event of the Consumer contract
 		console.log('[INFO] - Waiting for receipt...');
 		const waitTX = setInterval(async () => {

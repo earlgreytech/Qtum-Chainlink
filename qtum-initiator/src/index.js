@@ -15,8 +15,8 @@ const qtumAccount  = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 
 
-const oracleAddress = '0x9fBC856b110535F44407a5F2fC86e706608a8336'
-const ownerAddress = '0x7926223070547D2D15b2eF5e7383E541c338FfE9'
+// const oracleAddress = '0x9fBC856b110535F44407a5F2fC86e706608a8336'
+// const ownerAddress = '0x7926223070547D2D15b2eF5e7383E541c338FfE9'
 // The OracleRequest event ABI for decoding the event logs
 const oracleRequestAbi = [{"indexed":true,"name":"specId","type":"bytes32"},{"indexed":false,"name":"requester","type":"address"},{"indexed":false,"name":"requestId","type":"bytes32"},{"indexed":false,"name":"payment","type":"uint256"},{"indexed":false,"name":"callbackAddr","type":"address"},{"indexed":false,"name":"callbackFunctionId","type":"bytes4"},{"indexed":false,"name":"cancelExpiration","type":"uint256"},{"indexed":false,"name":"dataVersion","type":"uint256"},{"indexed":false,"name":"data","type":"bytes"}];
 
@@ -29,12 +29,8 @@ const confirmations = process.env.MIN_INCOMING_CONFIRMATIONS || 2;
 
 
 let web3 = new Web3()
-// let qweb3 = new Qweb3('http://10.1.60.254:23889')
-// qweb3.isConnected(() => {
-// 	console.log('isConnected')
-// }).catch(e => {
-// 	console.log(e)
-// })
+// let qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:23889')
+
 // The Subscriptions array holds the current job/oracle pairs that needs to be watched for events
 let Subscriptions = [];
 // The Events array holds the current event logs being processed for every jobId. Allows for chain reorg protection.
@@ -188,6 +184,7 @@ async function loadSubscriptions(){
 	});
 }
 
+
 /* Subscribes to the QTUM node for events emitted from the given Oracle address that contains a request
    for the specified job ID */
 async function newSubscription(jobId, oracleAddress){
@@ -196,6 +193,7 @@ async function newSubscription(jobId, oracleAddress){
 	const toBlock = "latest"
 	let emptyArray = []
 	rpc.getLogs({fromBlock, toBlock, oracleAddress, emptyArray}).then((event) => {
+		console.log(event)
 		try {
 			console.info('Detected an Oracle Request event for job ' + jobId);
 			console.log(event)

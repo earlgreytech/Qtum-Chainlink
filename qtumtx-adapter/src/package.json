@@ -15,7 +15,6 @@
 		"pg": "^8.3.0",
 		"qtumjs": "ceoimon/qtumjs-eth#master",
 		"qweb3": "^1.2.2",
-		"rskjs-util": "^1.0.3",
 		"web3": "^1.2.7"
 	},
 	"devDependencies": {

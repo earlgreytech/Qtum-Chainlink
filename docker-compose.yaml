@@ -38,38 +38,16 @@ services:
       - 5433:5432
     volumes:
       - db-data:/var/lib/postgresql/data
-  ethereum-node:
-    build: ./docker/ethereum-node
-    container_name: ethereum-node
-    image: smartcontract/gethnet
-    ports:
-      - 8545:8545
-      - 8546:8546
-    volumes:
-      - geth-db-data:/gethnet/datadir/geth
-    secrets:
-      - eth_node_passw
-  # rsk-node:
-  #   container_name: rsk-node
-  #   build: ./docker/rsk-node
-  #   ports:
-  #     - 4444:4444
-  #     - 4445:4445
-  #     - 30305:30305
-  #   volumes:
-  #     - rsk-db-data:/var/lib/rsk/database/regtest
   chainlink-node:
     container_name: chainlink-node
     build: ./docker/chainlink-node
     depends_on:
       - postgres-server
-      - ethereum-node
     environment: *db-login-data
     env_file:
       - ./docker/chainlink-node/.env
     links:
       - "postgres-server"
-      - "ethereum-node"
     ports:
       - 6688:6688
     secrets:
@@ -121,31 +99,6 @@ services:
       - adapter-modules:/home/qtumtx-adapter/node_modules
       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
       - shared-volume:/home/qtumtx-adapter/config
-  test-runner:
-    container_name: test-runner
-    build:
-      context: .
-      dockerfile: ./test-runner/Dockerfile
-    env_file:
-      - ./test-runner/.env
-    depends_on:
-      - qtum
-      - qtum-initiator
-      - qtumtx-adapter
-    links:
-      - "qtum"
-      - "qtum-initiator"
-      - "qtumtx-adapter"
-    secrets:
-      - adapter_key
-      - chainlink_api
-    volumes:
-       - ./test-runner/src:/home/test-runner/src
-       - ./chainlink-api-client/src:/home/chainlink-api-client/src
-       - runner-modules:/home/test-runner/node_modules
-       - contracts-build-directory:/home/test-runner/artifacts:z
-       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
-       - shared-volume:/home/test-runner/config:z
 secrets:
   adapter_key:
     file: ./qtumtx-adapter/src/.adapterKey
@@ -155,8 +108,6 @@ secrets:
     file: ./docker/chainlink-node/.api
   chainlink_key:
     file: ./docker/chainlink-node/keystore.json
-  eth_node_passw:
-    file: ./docker/ethereum-node/secret.txt
 volumes:
   adapter-modules:
   contracts-build-directory:

@@ -4,7 +4,7 @@ const { exec } = require('child_process');
 const express = require('express');
 const db = require('./db.js');
 const fs = require('fs');
-const rskUtils = require('rskjs-util');
+
 const Web3 = require('web3');
 const {Qweb3} = require('qweb3')
 require('console-stamp')(console);
