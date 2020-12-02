@@ -14,9 +14,6 @@ const rpcURL =  'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:
 const qtumAccount  = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 
-
-// const oracleAddress = '0x9fBC856b110535F44407a5F2fC86e706608a8336'
-// const ownerAddress = '0x7926223070547D2D15b2eF5e7383E541c338FfE9'
 // The OracleRequest event ABI for decoding the event logs
 const oracleRequestAbi = [{"indexed":true,"name":"specId","type":"bytes32"},{"indexed":false,"name":"requester","type":"address"},{"indexed":false,"name":"requestId","type":"bytes32"},{"indexed":false,"name":"payment","type":"uint256"},{"indexed":false,"name":"callbackAddr","type":"address"},{"indexed":false,"name":"callbackFunctionId","type":"bytes4"},{"indexed":false,"name":"cancelExpiration","type":"uint256"},{"indexed":false,"name":"dataVersion","type":"uint256"},{"indexed":false,"name":"data","type":"bytes"}];
 
@@ -24,13 +21,10 @@ const oracleRequestAbi = [{"indexed":true,"name":"specId","type":"bytes32"},{"in
 
 const app = express();
 const port = process.env.INITIATOR_PORT || 30055;
-
 const confirmations = process.env.MIN_INCOMING_CONFIRMATIONS || 2;
 
 
 let web3 = new Web3()
-// let qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:23889')
-
 // The Subscriptions array holds the current job/oracle pairs that needs to be watched for events
 let Subscriptions = [];
 // The Events array holds the current event logs being processed for every jobId. Allows for chain reorg protection.
@@ -127,14 +121,13 @@ async function chainlinkAuth(outgoingAccessKey, outgoingSecret){
 	});
 }
 
-/* Configures the initiator with a web3 instance connected to a QTUM network and tries to load the
+/* Configures the initiator with a QTUM JSON-RPC instance connected to a QTUM network and tries to load the
    subscriptions file and configuration file. */
 async function initiatorSetup(){
 	try {
-		// Configure the web3 instance connected to QTUM network
-		const networkSetup = await setupNetwork(QTUM_CONFIG);
-		console.info(`QTUM RPC is connected to the ${QTUM_CONFIG.name} node.`);
-
+		// Configures the JSON-RPC connection to the QTUM Network.
+		const connection = await setupNetwork(QTUM_CONFIG);
+		console.info(`QTUM is connected to the ${QTUM_CONFIG.name} node.`);
 		// Load the subscriptions from database
 		let subs = await loadSubscriptions();
 		if (subs.length > 0){
@@ -294,7 +287,7 @@ async function setupCredentials(){
 	});
 }
 
-/* Creates a new web3 instance connected to the specified network */
+/* Creates a new QTUM JSON-RPC instance connected to the specified network */
 function setupNetwork(node){
 	return new Promise(async function(resolve, reject){
 		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);

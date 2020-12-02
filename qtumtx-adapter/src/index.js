@@ -98,10 +98,9 @@ app.post("/adapter", async (req, res) => {
 /* Configures the adapter with a web3 instance connected to a QTUM network and sets up the adapter's wallet */
 async function adapterSetup(){
 	try {
-		// Configures the web3 instance connected to RSK network
-		const qweb3 = await setupNetwork(QTUM_CONFIG);
-		const chainId = 'JANUS';
-		console.info(`QTUM RPC is connected to the ${QTUM_CONFIG.name} node. Chain ID: ${chainId}`);
+		// Configures the JSON-RPC connection to the QTUM Network.
+		const connection = await setupNetwork(QTUM_CONFIG);
+		console.info(`QTUM is connected to the ${QTUM_CONFIG.name} node.`);
 		// Initialize currentNonce variable with current account's TX count
 		currentNonce = await rpc.getTransactionCount('qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW', 'latest');
 	}catch(e){
@@ -265,7 +264,7 @@ async function setupCredentials(){
 	});
 }
 
-/* Creates a new web3 instance connected to the specified network */
+/* Creates a new QTUM JSON-RPC instance connected to the specified network */
 function setupNetwork(node){
 	return new Promise(async function(resolve, reject){
 		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
