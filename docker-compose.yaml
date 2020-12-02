@@ -28,7 +28,6 @@ services:
       - "3889:3889"
       - "3890:3890"
     image: qtum/qtum:latest
-    # container_name: qtum_testchain
     command: qtumd -regtest  -rpcbind=0.0.0.0:3889 -rpcallowip=0.0.0.0/0 -logevents -rpcuser=qtum -rpcpassword=testpasswd -deprecatedrpc=accounts -printtoconsole
   postgres-server:
     container_name: postgres-server
