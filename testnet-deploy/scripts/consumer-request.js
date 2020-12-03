@@ -1,25 +1,38 @@
 /* Script that requests RIF/BTC price to the Consumer contract */
 const Consumer = artifacts.require("Consumer");
-
-// NEED TO WRITE CONSUMER CONTRACT HERE TO INTERACT WITH VIA TRUFFLE, DEPLOYED TO QTUM
+const url = require('url');
+const qtum = require("qtumjs-eth")
+const rpcURL =  'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:23889';
+const qtumAccount  = url.parse(rpcURL).auth.split(":")[0]
+const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
+const { QtumRPC } = require('qtumjs')
+const qtumConnection = new QtumRPC('http://qtum:testpasswd@qtum:3889')
+const repoData = require("../build/contracts/Consumer.json")
+const {
+  sender,
+  ...info
+} = repoData.contracts['../contracts/Consumer.sol']
+const consumerContract = new qtum.Contract(rpc, info)
+const opts = {gasPrice: 100}
 
 module.exports = async function(callback) {
 	try {
-		const consumer = await Consumer.deployed();
-		const payment = "0";
+		const consumer = await consumerContract.call("requestRIFPrice", [], opts );
+		console.log(consumer.outputs)
 		console.log('[INFO] - Requesting RIF Price...');
-		const result = await consumer.requestRIFPrice(payment);
-
-		const confirmation = result.confirm(1)
+		const confirmation = await consumer.confirm(1)
 		// Watch for the RequestFulfilled event of the Consumer contract
-		console.log('[INFO] - Waiting for receipt...');
+		// console.log('[INFO] - Waiting for receipt...');
+		if (confirmation) {
+		console.log('Confirmation', confirmation)
 		const waitTX = setInterval(async () => {
-			const receipt = await web3.eth.getTransactionReceipt(result.tx);
+			const receipt = await rpc.getTransactionReceipt(consumer.transactionHash);
 			if (receipt){
 				clearInterval(waitTX);
 				pollResponse(receipt.blockNumber + 1, consumer);
 			}
 		}, 5000);	
+	}
 	}catch(e){
 		console.error(e);
 		throw(e);
@@ -28,10 +41,11 @@ module.exports = async function(callback) {
 	async function pollResponse(fromBlock, consumer){
 		console.log('[INFO] - Polling for the response...');
 		const poll = setInterval(async () => {
-			web3.eth.getPastLogs({
+			rpc.getLogs({
+				'fromBlock': fromBlock,
+				'toBlock': 'latest',
 				'address': consumer.address,
 				'topics': [],
-				'fromBlock': web3.utils.toHex(fromBlock)
 			}).then(function(events){
 				if (events.length > 0){
 					clearInterval(poll);

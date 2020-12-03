@@ -187,7 +187,7 @@ async function newSubscription(jobId, oracleAddress){
 	const fromBlock = await rpc.getBlockNumber();
 	const toBlock = "latest"
 	let emptyArray = []
-	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": ["36F8b94deCcD98F00f603b34d614F8c16070F475"], "topics": []}]).then((event) => {
+	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": [], "topics": []}]).then((event) => {
 	console.log(event.topics)
 		try {
 			console.info('Detected an Oracle Request event for job ' + jobId);
@@ -306,7 +306,7 @@ function setupNetwork(node){
 		const fromBlock = await rpc.getBlockNumber();
 		const toBlock = "latest"
 		let emptyArray = []
-		const rawCall = await qtumConnection.rawCall('searchlogs', [fromBlock, "latest", {"addresses": ["eb7c624cFe276577cbc6e1CE27860cd0f9e7cd3E", "36F8b94deCcD98F00f603b34d614F8c16070F475"]}, {"topics": [null]}])
+		const rawCall = await qtumConnection.rawCall('searchlogs', [fromBlock, "latest", {"addresses": [ "206F2726d9fED32a22c2Dfa139f05E30Bae57a8a"]}, {"topics": [null]}])
 		console.log(rawCall)
 		rpc.getBlockNumber().then((value) => {
 			resolve(rpc)

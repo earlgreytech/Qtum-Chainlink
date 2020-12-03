@@ -6,12 +6,11 @@
 		"test": "npx truffle test"
 	},
 	"dependencies": {
-		"@truffle/contract": "^4.2.3",
-		"@truffle/hdwallet-provider": "^1.0.34",
 		"minimist": "^1.2.5",
 		"ora": "^5.1.0",
-		"qtumjs": "ceoimon/qtumjs-eth#master",
-		"truffle": "5.1.8"
+		"qtumjs": "^1.9.3",
+		"qtumjs-eth": "ceoimon/qtumjs-eth#master",
+		"solc": "0.5.0"
 	},
 	"devDependencies": {}
 }

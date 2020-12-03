@@ -70,7 +70,7 @@ You can also deploy a ERC721 token by choosing the `StandaloneERC721` contract w
 If you prefer to write your custom contracts, import the ones from this package and extend them through inheritance. Note that **you must use this package and not `@openzeppelin/contracts` if you are [writing upgradeable contracts](https://docs.zeppelinos.org/docs/writing_contracts.html)**.
 
 ```solidity
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0;
 
 import '@openzeppelin/upgrades/contracts/Initializable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721Full.sol';

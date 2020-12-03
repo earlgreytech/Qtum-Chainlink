@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0;
 
 import { CBOR as CBOR_Chainlink, Buffer as Buffer_Chainlink } from "./vendor/CBOR.sol";
 

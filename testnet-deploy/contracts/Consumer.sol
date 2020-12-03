@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0;
 
 import "./ChainlinkClient.sol";
 
@@ -17,16 +17,16 @@ contract Consumer is ChainlinkClient {
     specId = _specId;
   }
 
-  function requestRIFPrice(uint256 _payment) public {
-    requestRIFPriceByCallback(_payment, address(this));
+  function requestRIFPrice() public {
+    requestRIFPriceByCallback(address(this));
   }
 
-  function requestRIFPriceByCallback(uint256 _payment, address _callback) public {
+  function requestRIFPriceByCallback(address _callback) public {
     Chainlink.Request memory req = buildChainlinkRequest(specId, _callback, this.fulfill.selector);
     req.add("get", "https://api.liquid.com/products/580");
     req.add("path", "last_traded_price");
     req.addInt("times", 100000000);
-    sendChainlinkRequest(req, _payment);
+    sendChainlinkRequest(req, 0);
   }
 
   function cancelRequest(
