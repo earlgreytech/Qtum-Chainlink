@@ -9,11 +9,12 @@ const Web3 = require('web3');
 const db = require('./db.js');
 require('console-stamp')(console);
 const {Qweb3} = require('qweb3')
-const qtum = require("qtumjs")
+const qtum = require("qtumjs-eth")
 const rpcURL =  'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:23889';
 const qtumAccount  = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
-
+const { QtumRPC } = require('qtumjs')
+const qtumConnection = new QtumRPC('http://qtum:testpasswd@qtum:3889')
 // The OracleRequest event ABI for decoding the event logs
 const oracleRequestAbi = [{"indexed":true,"name":"specId","type":"bytes32"},{"indexed":false,"name":"requester","type":"address"},{"indexed":false,"name":"requestId","type":"bytes32"},{"indexed":false,"name":"payment","type":"uint256"},{"indexed":false,"name":"callbackAddr","type":"address"},{"indexed":false,"name":"callbackFunctionId","type":"bytes4"},{"indexed":false,"name":"cancelExpiration","type":"uint256"},{"indexed":false,"name":"dataVersion","type":"uint256"},{"indexed":false,"name":"data","type":"bytes"}];
 
@@ -25,6 +26,7 @@ const confirmations = process.env.MIN_INCOMING_CONFIRMATIONS || 2;
 
 
 let web3 = new Web3()
+let qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:3889')
 // The Subscriptions array holds the current job/oracle pairs that needs to be watched for events
 let Subscriptions = [];
 // The Events array holds the current event logs being processed for every jobId. Allows for chain reorg protection.
@@ -185,6 +187,7 @@ async function newSubscription(jobId, oracleAddress){
 	const fromBlock = await rpc.getBlockNumber();
 	const toBlock = "latest"
 	let emptyArray = []
+	const rawCall = await qtumConnection.rawCall('search_logs', [{"fromBlock": fromBlock, "toBlock": toBlock, "address": "qf2WxTmnb6oe2AKRDFxeXfD1DQo6exVczq", "topics": [], "minconf": 1}])
 	rpc.getLogs({fromBlock, toBlock, oracleAddress, emptyArray}).then((event) => {
 		console.log(event)
 		try {
@@ -291,6 +294,20 @@ async function setupCredentials(){
 function setupNetwork(node){
 	return new Promise(async function(resolve, reject){
 		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
+		// qweb3.isConnected().then(() => {
+		// 	console.log(qweb3.encoder.addressToHex("qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW"))
+		// 	console.log(qweb3.decoder.toQtumAddress("eb7c624cFe276577cbc6e1CE27860cd0f9e7cd3E", false))
+		// })
+		qtumConnection.fromHexAddress("eb7c624cFe276577cbc6e1CE27860cd0f9e7cd3E").then((result) => {
+			console.log(result)
+		}).catch((e) => {
+			console.log(e)
+		})
+		const fromBlock = await rpc.getBlockNumber();
+		const toBlock = "latest"
+		let emptyArray = []
+		const rawCall = await qtumConnection.rawCall('searchlogs', [fromBlock, "latest", {"addresses": ["eb7c624cFe276577cbc6e1CE27860cd0f9e7cd3E", "36F8b94deCcD98F00f603b34d614F8c16070F475"]}, {"topics": [null]}])
+		console.log(rawCall)
 		rpc.getBlockNumber().then((value) => {
 			resolve(rpc)
 		}).catch((e) => {

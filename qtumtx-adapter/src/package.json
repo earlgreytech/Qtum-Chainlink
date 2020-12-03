@@ -13,7 +13,8 @@
 		"console-stamp": "^0.2.9",
 		"express": "^4.17.1",
 		"pg": "^8.3.0",
-		"qtumjs": "ceoimon/qtumjs-eth#master",
+		"qtumjs": "^1.9.3",
+		"qtumjs-eth": "ceoimon/qtumjs-eth#master",
 		"qweb3": "^1.2.2",
 		"web3": "^1.2.7"
 	},

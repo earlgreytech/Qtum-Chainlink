@@ -288,7 +288,7 @@ axios@^0.17.1:
     follow-redirects "^1.2.5"
     is-buffer "^1.1.5"
 
-axios@^0.18.0:
+axios@^0.18.0, axios@^0.18.1:
   version "0.18.1"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.18.1.tgz#ff3f0de2e7b5d180e757ad98000f1081b87bcea3"
   integrity sha512-0BfJq4NSfQXd+SkFdrvFbG7addhYSBA2mQwISr46pD6E5iqkWg02RAs8vyTT/j0RTnoYmeXauBuSv1qKwR179g==
@@ -312,6 +312,11 @@ base64-js@^1.0.2:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.3.1.tgz#58ece8cb75dd07e71ed08c736abc5fac4dbf8df1"
   integrity sha512-mLQ4i2QO1ytvGWFWmcngKO//JXAQueZvwEKtjgQFM4jIK0kU+ytMfplL8j+n5mspOfjHwoAg+9yhb7BwAHm36g==
+
+base64-js@^1.3.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
+  integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
 
 bcrypt-pbkdf@^1.0.0:
   version "1.0.2"
@@ -512,6 +517,14 @@ buffer@^5.0.5, buffer@^5.5.0:
   dependencies:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
+
+buffer@^5.0.8:
+  version "5.7.1"
+  resolved "https://registry.yarnpkg.com/buffer/-/buffer-5.7.1.tgz#ba62e7c13133053582197160851a8f648e99eed0"
+  integrity sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==
+  dependencies:
+    base64-js "^1.3.1"
+    ieee754 "^1.1.13"
 
 bytes@3.1.0:
   version "3.1.0"
@@ -1565,6 +1578,11 @@ idna-uts46-hx@^2.3.1:
   dependencies:
     punycode "2.1.0"
 
+ieee754@^1.1.13:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.2.1.tgz#8eb7a10a63fff25d15a57b001586d177d1b0d352"
+  integrity sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
+
 ieee754@^1.1.4:
   version "1.1.13"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.13.tgz#ec168558e95aa181fd87d37f55c32bbcb6708b84"
@@ -2488,7 +2506,7 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
-qtumjs@ceoimon/qtumjs-eth#master:
+qtumjs-eth@ceoimon/qtumjs-eth#master:
   version "0.1.0"
   resolved "https://codeload.github.com/ceoimon/qtumjs-eth/tar.gz/d5b48d0e0de2ee7b88e35b851e4cb6db19a34cf2"
   dependencies:
@@ -2497,6 +2515,27 @@ qtumjs@ceoimon/qtumjs-eth#master:
     ethjs-abi "^0.2.1"
     eventemitter3 "^2.0.3"
     url-parse "^1.1.9"
+
+qtumjs-ethjs-abi@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/qtumjs-ethjs-abi/-/qtumjs-ethjs-abi-1.0.3.tgz#d2aecd89abfa4e118de48af9a741855cd89947dd"
+  integrity sha512-IOn0D32kwFkE2ivocN17RTTnBDNYSiAgHeVxcO3SFDgafPYHOumK9lcsw5TSgbYjHKv5+U3Zpu93BZ9U1gVzkQ==
+  dependencies:
+    bn.js "4.11.6"
+    buffer "^5.0.8"
+    js-sha3 "0.5.5"
+    number-to-bn "1.7.0"
+
+qtumjs@^1.9.3:
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/qtumjs/-/qtumjs-1.9.3.tgz#7531d8657812e47c1d671a486acfedde6777d5a1"
+  integrity sha512-RvbxaGEF0Fi7GZBFfQ2z2RVIVnURiYJdyyVclTcetcfmYVOrM4dsr545biM59ac7QbP5e/qhLW0IRdd5Zu15cA==
+  dependencies:
+    axios "^0.18.1"
+    btoa "^1.1.2"
+    eventemitter3 "^2.0.3"
+    qtumjs-ethjs-abi "^1.0.3"
+    url-parse "^1.4.7"
 
 query-string@^5.0.1:
   version "5.1.1"
@@ -3179,7 +3218,7 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-url-parse@^1.1.9:
+url-parse@^1.1.9, url-parse@^1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.4.7.tgz#a8a83535e8c00a316e403a5db4ac1b9b853ae278"
   integrity sha512-d3uaVyzDB9tQoSXFvuSUNFibTd9zxd2bkVrDRvF5TmvWWQwqE4lgYJ5m+x1DbecWkw+LK4RNl2CU1hHuOKPVlg==

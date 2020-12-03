@@ -4,15 +4,16 @@ const { exec } = require('child_process');
 const express = require('express');
 const db = require('./db.js');
 const fs = require('fs');
-
+const url = require('url');
 const Web3 = require('web3');
 const {Qweb3} = require('qweb3')
 require('console-stamp')(console);
-const qtum = require("qtumjs")
+const qtum = require("qtumjs-eth")
 const rpcURL =  'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:23889';
 const qtumAccount  = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
-
+const { QtumRPC } = require('qtumjs')
+const qtumConnection = new QtumRPC('http://qtum:testpasswd@qtum:3889')
 const adapterKey = fs.readFileSync(".adapterKey").toString().trim();
 const app = express();
 const port = process.env.ADAPTER_PORT || 30056;
