@@ -187,45 +187,45 @@ async function newSubscription(jobId, oracleAddress){
 	const fromBlock = await rpc.getBlockNumber();
 	const toBlock = "latest"
 	let emptyArray = []
-	const rawCall = await qtumConnection.rawCall('search_logs', [{"fromBlock": fromBlock, "toBlock": toBlock, "address": "qf2WxTmnb6oe2AKRDFxeXfD1DQo6exVczq", "topics": [], "minconf": 1}])
-	rpc.getLogs({fromBlock, toBlock, oracleAddress, emptyArray}).then((event) => {
-		console.log(event)
+	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": ["36F8b94deCcD98F00f603b34d614F8c16070F475"], "topics": []}]).then((event) => {
+	console.log(event.topics)
 		try {
 			console.info('Detected an Oracle Request event for job ' + jobId);
 			console.log(event)
-			// // If an array key is not present for this log Id, create one
-			// if (typeof Events[event.id] == 'undefined'){
-			// 	Events[event.id] = [];
-			// }
-			// // Set the removed flag to false for this new log Id
-			// Events[event.id].removed == false;
-			// // The timer variable to increment on every log check
-			// let timer = 0;
-			// // Check every 1 sec if there are changes in the log state
-			// const checkLog = setInterval(() => {
-			// 	timer++;
-			// 	// If the log's new state is removed, discard it
-			// 	if (Events[event.id].removed == true){
-			// 		delete Events[event.id];
-			// 		clearInterval(checkLog);
-			// 	}
-			// 	// The Initiator will wait MIN_INCOMING_CONFIRMATIONS blocks (30 secs per block, plus 2 more secs)
-			// 	// If the log remains unchanged after that, then will trigger the job run and delete the log from memory
-			// 	// If there is a chain reorg longer than that, the job run will be triggered again
-			// 	if (timer == ((confirmations * 120) + 2)){
-			// 		delete Events[event.id];
-			// 		clearInterval(checkLog);
-			// 		triggerJobRun(event, jobId, oracleAddress);
-			// 	}
-			// }, 1000);
+			// If an array key is not present for this log Id, create one
+			if (typeof Events[event.id] == 'undefined'){
+				Events[event.id] = [];
+			}
+			// Set the removed flag to false for this new log Id
+			Events[event.id].removed == false;
+			// The timer variable to increment on every log check
+			let timer = 0;
+			// Check every 1 sec if there are changes in the log state
+			const checkLog = setInterval(() => {
+				timer++;
+				// If the log's new state is removed, discard it
+				if (Events[event.id].removed == true){
+					delete Events[event.id];
+					clearInterval(checkLog);
+				}
+				// The Initiator will wait MIN_INCOMING_CONFIRMATIONS blocks (30 secs per block, plus 2 more secs)
+				// If the log remains unchanged after that, then will trigger the job run and delete the log from memory
+				// If there is a chain reorg longer than that, the job run will be triggered again
+				if (timer == ((confirmations * 120) + 2)){
+					delete Events[event.id];
+					clearInterval(checkLog);
+					triggerJobRun(event, jobId, oracleAddress);
+				}
+			}, 1000);
 			
 		}catch(e){
 			console.error(e);
 		}
 	}).catch((e) => {
 		console.log(e)
-	})
 	
+	})
+
 
 	
 	
