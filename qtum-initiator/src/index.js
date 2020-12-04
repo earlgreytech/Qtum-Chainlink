@@ -16,7 +16,7 @@ const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 const { QtumRPC } = require('qtumjs')
 const qtumConnection = new QtumRPC('http://qtum:testpasswd@qtum:3889')
 // The OracleRequest event ABI for decoding the event logs
-const oracleRequestAbi = [{"indexed":true,"name":"specId","type":"bytes32"},{"indexed":false,"name":"requester","type":"address"},{"indexed":false,"name":"requestId","type":"bytes32"},{"indexed":false,"name":"payment","type":"uint256"},{"indexed":false,"name":"callbackAddr","type":"address"},{"indexed":false,"name":"callbackFunctionId","type":"bytes4"},{"indexed":false,"name":"cancelExpiration","type":"uint256"},{"indexed":false,"name":"dataVersion","type":"uint256"},{"indexed":false,"name":"data","type":"bytes"}];
+const oracleRequestAbi = [{"indexed":false,"name":"specId","type":"bytes32"},{"indexed": false,"name":"requester","type":"address"},{"indexed": false,"name":"requestId","type":"bytes32"},{"indexed": false,"name":"payment","type":"uint256"},{"indexed": false,"name":"callbackAddr","type":"address"},{"indexed": false,"name":"callbackFunctionId","type":"bytes4"},{"indexed": false,"name":"cancelExpiration","type":"uint256"},{"indexed": false,"name":"dataVersion","type":"uint256"},{"indexed": true,"name":"data","type":"bytes"}];
 
 
 
@@ -187,37 +187,34 @@ async function newSubscription(jobId, oracleAddress){
 	const fromBlock = await rpc.getBlockNumber();
 	const toBlock = "latest"
 	let emptyArray = []
-	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": [], "topics": []}]).then((event) => {
-	console.log(event.topics)
+	// [fromBlock, null, {"addresses": ["8FBe41B9d93eD74a6AA00B221ac6474c600D2887"], "topics": ["d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65", "6430666262386230313838363436643662356237313036393330326461613262"]}, 1]
+	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": [], "topics": []}, 1]).then((event) => {
 		try {
-			console.info('Detected an Oracle Request event for job ' + jobId);
-			console.log(event)
 			// If an array key is not present for this log Id, create one
-			if (typeof Events[event.id] == 'undefined'){
-				Events[event.id] = [];
+			if (typeof Events[event.transactionHash] == 'undefined'){
+				Events[event.transactionHash] = [];
 			}
 			// Set the removed flag to false for this new log Id
-			Events[event.id].removed == false;
+			Events[event.transactionHash].removed == false;
 			// The timer variable to increment on every log check
 			let timer = 0;
 			// Check every 1 sec if there are changes in the log state
 			const checkLog = setInterval(() => {
 				timer++;
 				// If the log's new state is removed, discard it
-				if (Events[event.id].removed == true){
-					delete Events[event.id];
+				if (Events[event.transactionHash].removed == true){
+					delete Events[event.transactionHash];
 					clearInterval(checkLog);
 				}
 				// The Initiator will wait MIN_INCOMING_CONFIRMATIONS blocks (30 secs per block, plus 2 more secs)
 				// If the log remains unchanged after that, then will trigger the job run and delete the log from memory
 				// If there is a chain reorg longer than that, the job run will be triggered again
-				if (timer == ((confirmations * 120) + 2)){
-					delete Events[event.id];
+				if (timer == ((confirmations * 30) + 2)){
+					delete Events[event.transactionHash];
 					clearInterval(checkLog);
 					triggerJobRun(event, jobId, oracleAddress);
 				}
 			}, 1000);
-			
 		}catch(e){
 			console.error(e);
 		}
@@ -232,9 +229,9 @@ async function newSubscription(jobId, oracleAddress){
 	
 	// }).on('changed', event => {
 	// 	setTimeout(() => {
-	// 		if (typeof Events[event.id] !== 'undefined' && event.removed == true){
+	// 		if (typeof Events[event.transactionHash] !== 'undefined' && event.removed == true){
 	// 			console.info(`Detected a log change for job ${jobId}, will discard old log`);
-	// 			Events[event.id].removed = true;
+	// 			Events[event.transactionHash].removed = true;
 	// 		}
 	// 	}, 500);
 	// }).on('error', error => {
@@ -294,20 +291,7 @@ async function setupCredentials(){
 function setupNetwork(node){
 	return new Promise(async function(resolve, reject){
 		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
-		// qweb3.isConnected().then(() => {
-		// 	console.log(qweb3.encoder.addressToHex("qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW"))
-		// 	console.log(qweb3.decoder.toQtumAddress("eb7c624cFe276577cbc6e1CE27860cd0f9e7cd3E", false))
-		// })
-		qtumConnection.fromHexAddress("eb7c624cFe276577cbc6e1CE27860cd0f9e7cd3E").then((result) => {
-			console.log(result)
-		}).catch((e) => {
-			console.log(e)
-		})
-		const fromBlock = await rpc.getBlockNumber();
-		const toBlock = "latest"
-		let emptyArray = []
-		const rawCall = await qtumConnection.rawCall('searchlogs', [fromBlock, "latest", {"addresses": [ "206F2726d9fED32a22c2Dfa139f05E30Bae57a8a"]}, {"topics": [null]}])
-		console.log(rawCall)
+		// Checks to see if connection is succesful
 		rpc.getBlockNumber().then((value) => {
 			resolve(rpc)
 		}).catch((e) => {
@@ -319,8 +303,9 @@ function setupNetwork(node){
 /* Fires a job run on Chainlink Core passing the parameters received through the event logs */
 async function triggerJobRun(event, jobId, oracleAddress){
 	// Decode the event logs
-	const logs = web3.eth.abi.decodeLog(oracleRequestAbi, event.data, event.topics);
-	const specId = web3.utils.hexToUtf8(event.topics[1]);
+	const logs = web3.eth.abi.decodeLog(oracleRequestAbi, event.data, "3032623237616161396466323461383961653835613431356531653233633661");
+	console.log(logs, 'logs')
+	const specId = web3.utils.hexToUtf8("0x3032623237616161396466323461383961653835613431356531653233633661");
 	console.info(`Processing Oracle Request ID ${logs.requestId}. Triggering a job run for ${specId}...`);
 	// If there's request data present in the logs, then extract and decode it
 	let clReq;

@@ -27,7 +27,7 @@ contract Oracle is ChainlinkRequestInterface, OracleInterface, Ownable, LinkToke
   uint256 private withdrawableTokens = ONE_FOR_CONSISTENT_GAS_COST;
 
   event OracleRequest(
-    bytes32 indexed specId,
+    bytes32 specId,
     address requester,
     bytes32 requestId,
     uint256 payment,
@@ -35,7 +35,7 @@ contract Oracle is ChainlinkRequestInterface, OracleInterface, Ownable, LinkToke
     bytes4 callbackFunctionId,
     uint256 cancelExpiration,
     uint256 dataVersion,
-    bytes data
+    bytes indexed data
   );
 
   event CancelOracleRequest(
