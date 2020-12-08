@@ -221,6 +221,7 @@ async function newSubscription(jobId, oracleAddress){
 					const result = qtumConnection.rawCall("gettransactionreceipt", [txid]).then((theResult) => {
 						let eventData = event.entries[0].data
 						let topics = theResult[0].log[0].topics
+						
 						triggerJobRun(eventData, topics, jobId, oracleAddress);
 					})
 				}
