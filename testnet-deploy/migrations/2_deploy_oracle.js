@@ -2,7 +2,7 @@ const fs = require('fs');
 const Oracle = artifacts.require("Oracle");
 
 // Address of the ChainLink node
-const CHAINLINK_ADDRESS = "0xf52cE576e5d916df121DAd40398f5615E084BEBD";
+const CHAINLINK_ADDRESS = "0x7284d2FaEcbfD8C7bFE731C9d3A15F068f55178b";
 // HEX of QTUM Public Key associated with .adapterKey file
 const ADAPTER_ADDRESS = "0x7926223070547D2D15b2eF5e7383E541c338FfE9";
 

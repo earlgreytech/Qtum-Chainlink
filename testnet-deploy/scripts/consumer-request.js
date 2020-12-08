@@ -1,6 +1,4 @@
 /* Script that requests RIF/BTC price to the Consumer contract */
-
-
 const url = require('url');
 
 const rpcURL =  process.env.ETH_RPC;

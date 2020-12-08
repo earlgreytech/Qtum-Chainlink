@@ -9,7 +9,7 @@ const Web3 = require('web3');
 const {Qweb3} = require('qweb3')
 require('console-stamp')(console);
 const qtum = require("qtumjs-eth")
-const rpcURL =  'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:23889';
+const rpcURL =  'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.15:23889';
 const qtumAccount  = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 const { QtumRPC } = require('qtumjs')
@@ -149,10 +149,18 @@ async function fulfillRequest(req){
 				to: req.address,
 				data: encodedFulfill
 			};
+			console.log(tx)
 			// Increment nonce for the next TX
 			currentNonce++;
 			// Sign the transaction with the adapter's private key
-			const signed = await rpc.rawCall('signTransaction', [{...tx}, adapterKey])
+			const signed = await rpc.rawCall('eth_signTransaction', [{
+				gas: 500000,
+				gasPrice: gasPrice,
+				nonce: currentNonce,
+				to: req.address,
+				data: encodedFulfill
+			}])
+			console.log(signed)
 			// Send the signed transaction and resolve the TX hash, only if the transaction
 			// succeeded and events were emitted. If not, reject with tx receipt
 			rpc.sendTransaction(signed).then((txid) => {
