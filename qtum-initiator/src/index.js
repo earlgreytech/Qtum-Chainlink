@@ -194,7 +194,6 @@ async function newSubscription(jobId, oracleAddress){
 	const toBlock = "latest"
 	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": ["4c26e18e9a205a51b10a02f051f1852bc318f666"], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', '3838306263306439326133363433653938623230316532373561653033636631']}, 1]).then((event) => {
 		try {
-			console.log(event.entries, event.entries.length)
 			// If an array key is not present for this log Id, create one
 			if (typeof Events[event.transactionHash] == 'undefined'){
 				Events[event.transactionHash] = [];
@@ -217,11 +216,11 @@ async function newSubscription(jobId, oracleAddress){
 				if (timer == ((confirmations * 30) + 2)){
 					delete Events[event.transactionHash];
 					clearInterval(checkLog);
-					const txid = event.entries[3].transactionHash
+					const txid = event.transactionHash
 					const result = qtumConnection.rawCall("gettransactionreceipt", [txid]).then((theResult) => {
-						let eventData = event.entries[0].data
+						let eventData = event.data
 						let topics = theResult[0].log[0].topics
-						
+
 						triggerJobRun(eventData, topics, jobId, oracleAddress);
 					})
 				}
