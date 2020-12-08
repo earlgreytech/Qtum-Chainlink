@@ -103,7 +103,7 @@ async function adapterSetup(){
 		const connection = await setupNetwork(QTUM_CONFIG);
 		console.info(`QTUM is connected to the ${QTUM_CONFIG.name} node.`);
 		// Initialize currentNonce variable with current account's TX count, may need pending here
-		currentNonce = await rpc.getTransactionCount('qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW', 'latest');
+		currentNonce = await rpc.getTransactionCount('qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW', 'pending');
 	}catch(e){
 		console.error('Adapter setup failed:' + e);
 	}
@@ -130,6 +130,7 @@ async function chainlinkAuth(outgoingToken){
    functionSelector and dataPrefix params are optional, but if the request comes
    from the QTUM Initiator, they are surely present */
 async function fulfillRequest(req){
+	console.log
 	return new Promise(async function(resolve, reject){
 			let functionSelector = '', dataPrefix = '', encodedFulfill = '0x';
 			if (typeof req.functionSelector !== 'undefined'){
@@ -142,33 +143,34 @@ async function fulfillRequest(req){
 			encodedFulfill += functionSelector + dataPrefix + req.result.slice(2);
 			const gasPrice = parseInt(await rpc.getGasPrice() * 1.3);
 			// TX params
+			console.log(currentNonce)
 			const tx = {
 				gas: 500000,
 				gasPrice: gasPrice,
 				nonce: currentNonce,
 				to: req.address,
-				data: encodedFulfill
+				data: encodedFulfill,
+				value: 0
 			};
-			console.log(tx)
 			// Sign the transaction with the adapter's private key
-			const signed = await rpc.rawCall('eth_signTransaction', [{
-				gas: 500000,
-				gasPrice: gasPrice,
-				nonce: currentNonce,
-				to: req.address,
-				data: encodedFulfill
-			}])
-			// Increment nonce for the next TX
-			currentNonce++;
-			console.log(signed)
-			// Send the signed transaction and resolve the TX hash, only if the transaction
-			// succeeded and events were emitted. If not, reject with tx receipt
-			rpc.sendTransaction(signed).then((txid) => {
-				rpc.getTransactionReceipt(txid).then((receipt) => {
+			// const signed = await rpc.rawCall('eth_signTransaction', [{
+			// 	gas: 500000,
+			// 	gasPrice: gasPrice,
+			// 	nonce: currentNonce,
+			// 	to: req.address,
+			// 	data: encodedFulfill,
+			// }])
+			// console.log(signed)
+		
+			rpc.sendTransaction(tx).then((txid) => {
+				console.log(txid)
+				rpc.getTransactionReceipt(txid.txid).then((receipt) => {
 					console.info('Fulfill Request TX has been mined: ' + receipt.transactionHash);
-					if ((typeof receipt.status !== 'undefined' && receipt.status == true) && (typeof receipt.logs !== 'undefined' && receipt.logs.length > 0)){
+					if ((typeof receipt.status !== 'undefined') && (typeof receipt.logs !== 'undefined')){
 						// TODO: Save transaction history to database
 						console.info(`Transaction ${receipt.transactionHash} is in TX Pool`);
+						// Increment nonce for the next TX
+						currentNonce++;
 						resolve(receipt.transactionHash);
 					}else{
 						reject(receipt);
