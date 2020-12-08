@@ -190,7 +190,7 @@ async function loadSubscriptions(){
    for the specified job ID */
 async function newSubscription(jobId, oracleAddress){
 	console.info(`Subscribing to Oracle at ${oracleAddress} for requests to job ID ${jobId}...`);
-	const fromBlock = await rpc.getBlockNumber();
+	let fromBlock = await rpc.getBlockNumber();
 	const toBlock = "latest"
 	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": ["4c26e18e9a205a51b10a02f051f1852bc318f666"], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', '3838306263306439326133363433653938623230316532373561653033636631']}, 1]).then((event) => {
 		try {
@@ -222,8 +222,8 @@ async function newSubscription(jobId, oracleAddress){
 						let eventData = event.entries[0].data
 						console.log(theResult)
 						let topics = theResult[0].log[0].topics
-
 						triggerJobRun(eventData, topics, jobId, oracleAddress);
+						fromBlock = event.entries[0].nextblock
 					})
 				}
 			}, 1000);
