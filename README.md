@@ -1,4 +1,4 @@
-# Chainlink-RSK Integration MVP
+# Chainlink-QTUM Integration MVP
 
 This repository contains an MVP boilerplate for testing the integration of Chainlink Oracle services with RSK blockchain network.
 The objective is to provide external data to a Consumer contract deployed on RSK network through the Chainlink Oracle system,
