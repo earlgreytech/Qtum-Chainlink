@@ -102,7 +102,7 @@ async function adapterSetup(){
 		// Configures the JSON-RPC connection to the QTUM Network.
 		const connection = await setupNetwork(QTUM_CONFIG);
 		console.info(`QTUM is connected to the ${QTUM_CONFIG.name} node.`);
-		// Initialize currentNonce variable with current account's TX count
+		// Initialize currentNonce variable with current account's TX count, may need pending here
 		currentNonce = await rpc.getTransactionCount('qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW', 'latest');
 	}catch(e){
 		console.error('Adapter setup failed:' + e);
@@ -150,8 +150,6 @@ async function fulfillRequest(req){
 				data: encodedFulfill
 			};
 			console.log(tx)
-			// Increment nonce for the next TX
-			currentNonce++;
 			// Sign the transaction with the adapter's private key
 			const signed = await rpc.rawCall('eth_signTransaction', [{
 				gas: 500000,
@@ -160,6 +158,8 @@ async function fulfillRequest(req){
 				to: req.address,
 				data: encodedFulfill
 			}])
+			// Increment nonce for the next TX
+			currentNonce++;
 			console.log(signed)
 			// Send the signed transaction and resolve the TX hash, only if the transaction
 			// succeeded and events were emitted. If not, reject with tx receipt

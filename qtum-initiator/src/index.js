@@ -32,7 +32,7 @@ const confirmations = process.env.MIN_INCOMING_CONFIRMATIONS || 2;
 
 
 let web3 = new Web3()
-let qweb3 = new Qweb3('http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254:3889')
+let qweb3 = new Qweb3('http://qtum:testpasswd@qtum:3889')
 // The Subscriptions array holds the current job/oracle pairs that needs to be watched for events
 let Subscriptions = [];
 // The Events array holds the current event logs being processed for every jobId. Allows for chain reorg protection.
@@ -192,7 +192,7 @@ async function newSubscription(jobId, oracleAddress){
 	console.info(`Subscribing to Oracle at ${oracleAddress} for requests to job ID ${jobId}...`);
 	const fromBlock = await rpc.getBlockNumber();
 	const toBlock = "latest"
-	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": ["4c26e18e9a205a51b10a02f051f1852bc318f666"], "topics": []}, 1]).then((event) => {
+	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": ["4c26e18e9a205a51b10a02f051f1852bc318f666"], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', '3838306263306439326133363433653938623230316532373561653033636631']}, 1]).then((event) => {
 		try {
 			console.log(event.entries, event.entries.length)
 			// If an array key is not present for this log Id, create one
@@ -219,7 +219,7 @@ async function newSubscription(jobId, oracleAddress){
 					clearInterval(checkLog);
 					const txid = event.entries[3].transactionHash
 					const result = qtumConnection.rawCall("gettransactionreceipt", [txid]).then((theResult) => {
-						let eventData = event.entries[3].data
+						let eventData = event.entries[0].data
 						let topics = theResult[0].log[0].topics
 						triggerJobRun(eventData, topics, jobId, oracleAddress);
 					})
