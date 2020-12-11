@@ -130,8 +130,8 @@ async function chainlinkAuth(outgoingToken){
    functionSelector and dataPrefix params are optional, but if the request comes
    from the QTUM Initiator, they are surely present */
 async function fulfillRequest(req){
-	console.log
 	return new Promise(async function(resolve, reject){
+			console.log(req)
 			let functionSelector = '', dataPrefix = '', encodedFulfill = '0x';
 			if (typeof req.functionSelector !== 'undefined'){
 				functionSelector = req.functionSelector.slice(2);
@@ -142,25 +142,30 @@ async function fulfillRequest(req){
 			// Concatenate the data
 			encodedFulfill += functionSelector + dataPrefix + req.result.slice(2);
 			const gasPrice = parseInt(await rpc.getGasPrice() * 1.3);
+			console.log(gasPrice)
 			// TX params
-			console.log(currentNonce)
+			console.log(currentNonce, encodedFulfill)
 			const tx = {
+				gas: 500000,
+				gasPrice: gasPrice,
+				nonce: parseInt(currentNonce),
+				to: req.address,
+				data: encodedFulfill,
+			};
+			// Sign the transaction with the adapter's private key
+			try {
+			const signed = await rpc.rawCall('eth_signTransaction', [{
 				gas: 500000,
 				gasPrice: gasPrice,
 				nonce: currentNonce,
 				to: req.address,
 				data: encodedFulfill,
-				value: 0
-			};
-			// Sign the transaction with the adapter's private key
-			// const signed = await rpc.rawCall('eth_signTransaction', [{
-			// 	gas: 500000,
-			// 	gasPrice: gasPrice,
-			// 	nonce: currentNonce,
-			// 	to: req.address,
-			// 	data: encodedFulfill,
-			// }])
-			// console.log(signed)
+				from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9"
+			}])
+			console.log(signed)
+		} catch (e) {
+			console.log(JSON.stringify(e))
+		}
 		
 			rpc.sendTransaction(tx).then((txid) => {
 				console.log(txid)
