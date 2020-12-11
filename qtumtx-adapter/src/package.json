@@ -6,7 +6,8 @@
 		"start": "node index.js",
 		"dev": "npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
 		"setup": "node setup.js",
-		"remove": "node remove.js"
+		"remove": "node remove.js",
+		"postinstall": "cd node_modules/qtumjs/ && yarn && yarn build ; cd ../../ "
 	},
 	"dependencies": {
 		"chainlink-api-client": "file:../../chainlink-api-client",

@@ -11,26 +11,21 @@ is included to setup the environment and test the complete data flow, which will
 
 This boilerplate has 7 services, each running in its own Docker container
 
-- `chainlink-node`, a Chainlink node connected to an Eth dev network, using the develop Docker image.
+- `chainlink-node`, a Chainlink node for testing with qtum-initiator and qtumtx-adapter bridges, using the develop Docker image.
 - `postgres-server`, a PostgreSQL server for the Chainlink node, RSK Initiator and RSKTX Adapter databases.
-- `ethereum-node`, an Ethereum geth node for the Chainlink node to connect to.
-- `rsk-node`, a single RSK node configured to work on regtest network (private development network), using latest Docker image.
-- `rsk-initiator`, an external initiator connected to the RSK node that reads the event log from an Oracle contract and invokes a job run. A new
+- `qtum`, a single QTUM node configured to work on regtest network (private development network), using latest Docker image.
+- `janus`, a QTUM adapter to the ETH JSON-RPC node configured to work with the qtum node (private development network), using latest Docker image.
+- `qtum-initiator`, an external initiator connected to the RSK node that reads the event log from an Oracle contract and invokes a job run. A new
 run created by the RSK Initiator is automatically given the parameters needed for the RSK TX adapter task to report the run
 back to the contract that originally created the event log, just like the native Runlog initiator.
-- `rsktx-adapter`, an external adapter connected to the RSK node that takes the input given and places it into the data field of a transaction,
+- `qtumtx-adapter`, an external adapter connected to the RSK node that takes the input given and places it into the data field of a transaction,
 just like the native EthTx adapter. It then signs the transaction and sends it to an address on RSK network.
-- `test-runner`, a node script that initializes the testing environment, first deploying a SideToken contract and an Oracle contract. It then configures
-the Chainlink node, creating the initiator and adapter bridges and a job that includes them. Once the Chainlink node is ready, it deploys
-a Consumer contract configured with the previously deployed SideToken and Oracle contracts, and the previously created job. Then mints
-tokens and sends some to the Consumer contract. Finally it calls the requestRIFPrice of the Consumer contract and then polls it for
-current price.
 
 ## Contracts:
 
 - `Oracle`, the Oracle contract is the 0.5 version, with a single modification on the onTokenTransfer function of the LinkTokenReceiver to be able
 to work with the SideToken.
-- `SideToken`, is the contract that will be created through the RSK Token Bridge, mirroring the LinkToken contract deployed on Ethereum network.
+- `Link`, is the contract that will be deployed on the QTUM network, mirroring the LinkToken contract deployed on Ethereum network.
 - `Consumer`, is the contract that will request the data to the Oracle. On test run, it will request last traded price of RIF/BTC pair from Liquid.com exchange.
 
 ## Install

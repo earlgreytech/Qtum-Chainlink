@@ -7,7 +7,8 @@
 		"dev": "npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
 		"setup": "node setup.js",
 		"remove": "node remove.js",
-		"delsubs": "node delsubs.js"
+		"delsubs": "node delsubs.js",
+		"postinstall": "cd node_modules/qtumjs/ && yarn && yarn build ; cd ../../ "
 	},
 	"dependencies": {
 		"body-parser": "^1.19.0",
