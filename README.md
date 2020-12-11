@@ -1,31 +1,30 @@
 # Chainlink-QTUM Integration MVP
 
-This repository contains an MVP boilerplate for testing the integration of Chainlink Oracle services with RSK blockchain network.
-The objective is to provide external data to a Consumer contract deployed on RSK network through the Chainlink Oracle system,
-using a simple and natural way to join both services thanks to the help of an external initiator and external adapter. A test runner
-is included to setup the environment and test the complete data flow, which will be:
+This repository contains an MVP boilerplate for testing the integration of Chainlink Oracle services with the QTUM blockchain network.
+The objective is to provide external data to a Consumer contract deployed on QTUM network through the Chainlink Oracle system,
+using a simple and natural way to join both services thanks to the help of an external initiator and external adapter. 
 
-`Consumer contract => Oracle contract => RSK Initiator => Chainlink => RSK TX Adapter => Oracle contract => Consumer contract`
+`Consumer contract => Oracle contract => QTUM Initiator => Chainlink => QTUM TX Adapter => Oracle contract => Consumer contract`
 
 ## Services:
 
-This boilerplate has 7 services, each running in its own Docker container
+This boilerplate has 6 services, each running in its own Docker container
 
 - `chainlink-node`, a Chainlink node for testing with qtum-initiator and qtumtx-adapter bridges, using the develop Docker image.
-- `postgres-server`, a PostgreSQL server for the Chainlink node, RSK Initiator and RSKTX Adapter databases.
+- `postgres-server`, a PostgreSQL server for the Chainlink node, QTUM Initiator and QTUMTX Adapter databases.
 - `qtum`, a single QTUM node configured to work on regtest network (private development network), using latest Docker image.
 - `janus`, a QTUM adapter to the ETH JSON-RPC node configured to work with the qtum node (private development network), using latest Docker image.
-- `qtum-initiator`, an external initiator connected to the RSK node that reads the event log from an Oracle contract and invokes a job run. A new
-run created by the RSK Initiator is automatically given the parameters needed for the RSK TX adapter task to report the run
+- `qtum-initiator`, an external initiator connected to the QTUM node that reads the event log from an Oracle contract and invokes a job run. A new
+run created by the QTUM Initiator is automatically given the parameters needed for the QTUM TX adapter task to report the run
 back to the contract that originally created the event log, just like the native Runlog initiator.
-- `qtumtx-adapter`, an external adapter connected to the RSK node that takes the input given and places it into the data field of a transaction,
-just like the native EthTx adapter. It then signs the transaction and sends it to an address on RSK network.
+- `qtumtx-adapter`, an external adapter connected to the QTUM node that takes the input given and places it into the data field of a transaction,
+just like the native EthTx adapter. It then signs the transaction and sends it to an address on QTUM network.
 
 ## Contracts:
 
 - `Oracle`, the Oracle contract is the 0.5 version, with a single modification on the onTokenTransfer function of the LinkTokenReceiver to be able
 to work with the SideToken.
-- `Link`, is the contract that will be deployed on the QTUM network, mirroring the LinkToken contract deployed on Ethereum network.
+- `Link`, is the contract that will be deployed on the QTUM network, mirroring the LinkToken contract deployed on Ethereum network (deployed via Remix as it has a different solc version than majority of contracts).
 - `Consumer`, is the contract that will request the data to the Oracle. On test run, it will request last traded price of RIF/BTC pair from Liquid.com exchange.
 
 ## Install
@@ -34,12 +33,12 @@ to work with the SideToken.
 
 ## Run Local Development Setup
 
-To start the services and the test runner, simply run:
+To start the services, simply run:
 
 ```bash
 docker-compose up
 ```
-Docker will download the required images, build the containers and start services. The test runner should start automatically.
+Docker will download the required images, build the containers and start services.
 
 To stop the containers and delete the volumes, so that the configuration and chain resets:
 
@@ -47,57 +46,55 @@ To stop the containers and delete the volumes, so that the configuration and cha
 docker-compose down -v
 ```
 
-## Connect your Chainlink node to RSK Testnet
+## Install Solar Smart Contract Deployment Tool
 
-Provided you have a functioning Chainlink node, and are interested in trying the RSK Initiator and RSKTX Adapters to interact with RSK Network, you can follow these instructions to get started.
+After following the instructions for setting up Solar at https://github.com/qtumproject/solar, you will likely need to add solar to your path for access in other directories.
+
+## Connect your Chainlink node to QTUM Testnet
+
+Provided you have a functioning Chainlink node, and are interested in trying the QTUM Initiator and QTUMTX Adapters to interact with RSK Network, you can follow these instructions to get started.
 
 ### Prerequisites.
 
 You'll need to create a Postgres database for the Initiator and another for the Adapter. You can quickly set this up with the psql cli utility:
 
 ```bash
-psql -U postgres -c "create database rsk_initiator"
-psql -U postgres -c "create database rsktx_adapter"
+psql -U postgres -c "create database qtum_initiator"
+psql -U postgres -c "create database qtumtx_adapter"
 ```
 
 ### 1. Clone the repository and enter project directory
 
 ```bash
-git clone https://github.com/smartcontractkit/chainlink-RSK.git && cd chainlink-RSK
+git clone https://github.com/BlockSpaces/Qtum-Chainlink.git && git checkout bugs-branch || git checkout development
 ```
 
 ### 2. Configure the Initiator and Adapter
 
 Create an .env-testnet file for each service and set the configuration environment variables.
 
-#### RSK Initiator
+#### QTUM Initiator
 
 | Key | Description | Example |
 |-----|-------------|---------|
 | `CHAINLINK_BASE_URL` | The URL of the Chainlink Core service with a trailing slash | `http://localhost:6688/` |
 | `DATABASE_URL` | The URL of the Postgres connection | `postgresql://user:passw@host:5432/dbname` |
-| `INITIATOR_HOST` | The hostname of the RSK Initiator | `localhost` |
-| `INITIATOR_NAME` | The Initiator name that will be registered on Chainlink Core | `rskinitiator` |
+| `INITIATOR_HOST` | The hostname of the QTUM Initiator | `localhost` |
+| `INITIATOR_NAME` | The Initiator name that will be registered on Chainlink Core | `qtuminitiator` |
 | `INITIATOR_PORT` | The port where the Initiator service will be listening | `30055` |
 | `MIN_INCOMING_CONFIRMATIONS` | The number of blocks to wait before triggering a job run | `3` |
-| `RSK_HOST` | The hostname of the RSK Node RPC | `localhost` |
-| `RSK_WS_PROTOCOL` | The protocol that will be used to connect to the RSK Node RPC (ws or wss) | `ws` |
-| `RSK_WS_PORT` | The port to connect to the RSK Node RPC websocket | `4445` |
-| `RSK_WS_URL` | The RSK Node RPC websocket endpoint URL | `/websocket` |
+| `QTUM_HOST` | The hostname of the QTUM Node RPC | `localhost` |
 
-#### RSKTX Adapter
+#### QTUMTX Adapter
 
 | Key | Description | Example |
 |-----|-------------|---------|
-| `ADAPTER_HOST` | The hostname of the RSKTX Adapter | `localhost` |
-| `ADAPTER_NAME` | The Adapter name that will be registered on Chainlink Core | `rsktxadapter` |
+| `ADAPTER_HOST` | The hostname of the QTUMTX Adapter | `localhost` |
+| `ADAPTER_NAME` | The Adapter name that will be registered on Chainlink Core | `qtumtxadapter` |
 | `ADAPTER_PORT` | The port where the Adapter service will be listening | `30056` |
 | `CHAINLINK_BASE_URL` | The URL of the Chainlink Core service with a trailing slash | `http://localhost:6688/` |
 | `DATABASE_URL` | The URL of the Postgres connection | `postgresql://user:passw@host:5432/dbname` |
-| `RSK_HOST` | The hostname of the RSK Node RPC | `localhost` |
-| `RSK_WS_PROTOCOL` | The protocol that will be used to connect to the RSK Node RPC (ws or wss) | `ws` |
-| `RSK_WS_PORT` | The port to connect to the RSK Node RPC websocket | `4445` |
-| `RSK_WS_URL` | The RSK Node RPC websocket endpoint URL | `/websocket` |
+| `QTUM_HOST` | The hostname of the RSK Node RPC | `localhost` |
 
 ### 3. Configure Chainlink API credentials
 
@@ -108,31 +105,50 @@ admin@example.com
 changethis
 ```
 
-### 4. Configure RSKTX Adapter account
+### 4. Configure QTUMTX Adapter account
 
-The RSKTX Adapter needs an account to sign and send the transactions to the network. To configure the account, save its private key in a file and reference it later when running the adapter. This account will need to have RBTC to pay por the transactions sent to the network. Testnet RBTC can be obtained through the RSK Testnet Faucet in https://faucet.rsk.co.
+The QTUMTX Adapter needs an account to sign and send the transactions to the network. To configure the account, save its private key in a file and reference it later when running the adapter. This account will need to have QTUM to pay for the transactions sent to the network. Testnet QTUM can be obtained by downloading https://github.com/qtumproject/janus and running `./fill_user_account.sh` script.
 
-### 5. Build the RSK Initiator and RSKTX Adapter Docker images 
+### 5. Build the QTUM Initiator and QTUMTX Adapter Docker images 
 
 ```bash
-docker build -t rsk-initiator-testnet -f ./rsk-initiator/Dockerfile.testnet .
-docker build -t rsktx-adapter-testnet -f ./rsktx-adapter/Dockerfile.testnet .
+docker build -t qtum-initiator-testnet -f ./qtum-initiator/Dockerfile.testnet .
+docker build -t qtumtx-adapter-testnet -f ./qtumtx-adapter/Dockerfile.testnet .
 ```
 
 ### 6. Run the services
 
-You can run the services containers in several ways. For the purpose of this quick guide, we'll use the docker run command. Be sure to pass the api credentials and make them available through the .api file in the destination paths /home/rsk-initiator/src/.api for the initiator, and /home/rsktx-adapter/src/.api for the adapter. You need to do the same with the .adapterKey file when runnning the RSKTX Adapter, also you need to load the environment variables from the .env-testnet file. In the example, optionally, a port parameter is added to map the service port to localhost.
+You can run the services containers in several ways. For the purpose of this quick guide, we'll use the docker run command. Be sure to pass the api credentials and make them available through the .api file in the destination paths /home/qtum-initiator/src/.api for the initiator, and /home/qtumtx-adapter/src/.api for the adapter. You need to do the same with the .adapterKey file when runnning the QTUMTX Adapter, also you need to load the environment variables from the .env-testnet file. In the example, optionally, a port parameter is added to map the service port to localhost.
 
 ```bash
-docker run -v /path/to/host/api/file:/home/rsk-initiator/src/.api --env-file /path/to/initiator/.env-testnet -p 30055:30055 rsk-initiator-testnet
-docker run -v /path/to/host/api/file:/home/rsktx-adapter/src/.api -v /path/to/host/adapterKey/file:/home/rsktx-adapter/src/.adapterKey --env-file /path/to/adapter/.env-testnet -p 30056:30056 rsktxk-adapter-testnet
+docker run -v /path/to/host/api/file:/home/qtum-initiator/src/.api --env-file /path/to/initiator/.env-testnet -p 30055:30055 qtum-initiator-testnet
+docker run -v /path/to/host/api/file:/home/qtumtx-adapter/src/.api -v /path/to/host/adapterKey/file:/home/qtumtx-adapter/src/.adapterKey --env-file /path/to/adapter/.env-testnet -p 30056:30056 qtumtxk-adapter-testnet
 ```
 The services will configure the database and register the Initiator and Adapter in Chainlink Core when first started.
 
-### 7. Deploy the Oracle contract to RSK Testnet
+### 7. Deploy the Oracle contract to QTUM Testnet
 
-You'll need to deploy an Oracle contract on RSK Testnet to be able to receive requests. In the directory testnet-deploy there are some useful scripts to accomplish this.
-* Edit the truffle-config.js to configure the RSK node RPC connection.
+You'll need to deploy an Oracle contract on QTUM Testnet to be able to receive requests. In the directory testnet-deploy there are some useful scripts to accomplish this.
+* Edit the truffle-config.js to configure the QTUM node RPC connection.
+* Configure the account that will be used to deploy the contract. To do this, save its private key on the testnet-deploy/.deployerKey file. Remember this account needs to be funded with QTUM.
+* Edit the testnet-deploy/migrations/2_deploy_oracle.js and configure the ADAPTER_ADDRESS constant, setting the adapter's account address. This is needed so the migration script, after the contract deploy, can call the setFulfillmentPermission function on the contract to authorize the adapter address to fulfill Oracle's requests.
+* Step into the testnet-deploy directory, install the dependencies and run the first and second migrations using Truffle:
+
+```bash
+cd testnet-deploy
+npm install
+npx truffle migrate --f 1 --to 2 --network rskTestnet
+```
+
+**SECURITY WARNING**: This example has been created just for testing the QTUM Initiator and QTUMTx Adapter using the QTUM Testnet. It deploys a single sourced Oracle contract which does not use any of the Chainlink’s more advanced features such as: aggregation of data sources, slashing node deposits, etc. It's not recommended to run this setup on production in Mainnet. As a Node Operator, you should be familiar with the best practices:
+- [Best Security and Operating Practices](https://docs.chain.link/docs/best-security-practices)
+- [Setting-up failover redundant RSK node connections](https://github.com/Fiews/ChainlinkEthFailover)
+- [Enabling HTTPS connections](https://docs.chain.link/docs/enabling-https-connections)
+
+### 7. Deploy the Oracle contract to QTUM Testnet
+
+You'll need to deploy an Oracle contract on QTUM Testnet to be able to receive requests. In the directory testnet-deploy there are some useful scripts to accomplish this.
+* Edit the truffle-config.js to configure the QTUM node RPC connection.
 * Configure the account that will be used to deploy the contract. To do this, save its private key on the testnet-deploy/.deployerKey file. Remember this account needs to be funded with RBTC.
 * Edit the testnet-deploy/migrations/2_deploy_oracle.js and configure the ADAPTER_ADDRESS constant, setting the adapter's account address. This is needed so the migration script, after the contract deploy, can call the setFulfillmentPermission function on the contract to authorize the adapter address to fulfill Oracle's requests.
 * Step into the testnet-deploy directory, install the dependencies and run the first and second migrations using Truffle:
@@ -150,7 +166,7 @@ npx truffle migrate --f 1 --to 2 --network rskTestnet
 
 ### 8. Create a test job
 
-Now the only thing left to do is to test the request flow. First, login into the Chainlink Operator WebUI and create a new job that uses the RSK Initiator and the RSKTX Adapter. You'll need to replace RSK_INITIATOR_NAME, ORACLE_CONTRACT_ADDRESS and RSKTX_ADAPTER_NAME with your values.
+Now the only thing left to do is to test the request flow. First, login into the Chainlink Operator WebUI and create a new job that uses the QTUM Initiator and the QTUMTX Adapter. You'll need to replace QTUM_INITIATOR_NAME, ORACLE_CONTRACT_ADDRESS and QTUMTX_ADAPTER_NAME with your values.
 
 ```json
 {
@@ -158,7 +174,7 @@ Now the only thing left to do is to test the request flow. First, login into the
 		{
 			"type": "external",
 			"params": {
-				"name": "RSK_INITIATOR_NAME",
+				"name": "QTUM_INITIATOR_NAME",
 				"body": {
 					"address": "ORACLE_CONTRACT_ADDRESS"
 				}
@@ -179,7 +195,7 @@ Now the only thing left to do is to test the request flow. First, login into the
 			"type": "ethuint256"
 		},
 		{
-			"type": "RSKTX_ADAPTER_NAME"
+			"type": "QTUMTX_ADAPTER_NAME"
 		}
 	]
 }

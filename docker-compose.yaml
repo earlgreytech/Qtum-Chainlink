@@ -99,8 +99,9 @@ services:
       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
       - shared-volume:/home/qtumtx-adapter/config
 secrets:
-  adapter_key:
-    file: ./qtumtx-adapter/src/.adapterKey
+  # Janus derives a copy of private keys from your public key in it's current state, thus the adapterKey is futile.
+  # adapter_key:
+  #   file: ./qtumtx-adapter/src/.adapterKey
   chainlink_secret:
     file: ./docker/chainlink-node/.secret
   chainlink_api:
