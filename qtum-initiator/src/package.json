@@ -8,7 +8,7 @@
 		"setup": "node setup.js",
 		"remove": "node remove.js",
 		"delsubs": "node delsubs.js",
-		"postinstall": "cd node_modules/qtumjs/ && yarn && yarn build ; cd ../../ "
+		"postinstall": "cd node_modules/qtumjs-eth/ && yarn && yarn build ; cd ../../ "
 	},
 	"dependencies": {
 		"body-parser": "^1.19.0",

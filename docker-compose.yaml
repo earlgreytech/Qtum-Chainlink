@@ -88,7 +88,7 @@ services:
       - "qtum"
     ports:
       - 30056:30056
-    secrets:
+    # secrets:
       # - adapter_key
       # - source: chainlink_api
       #   target: /home/qtumtx-adapter/src/.api
