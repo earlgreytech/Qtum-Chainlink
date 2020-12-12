@@ -330,6 +330,7 @@ async function triggerJobRun(eventData, topics, jobId, oracleAddress){
 	);
 	// 0x4ab0d190 is the selector for the Oracle fulfillRequest() function
 	clReq.functionSelector = '0x4ab0d190';
+	console.log(logs.requestId, logs.payment, logs.callbackAddr, logs.callbackFunctionId, logs.cancelExpiration, 'HERE')
 	// Load auth credentials from database
 	const auth = await loadCredentials();
 	// Trigger the job run, passing auth credentials and the complete request

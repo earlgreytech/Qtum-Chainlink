@@ -130,6 +130,7 @@ async function chainlinkAuth(outgoingToken){
    functionSelector and dataPrefix params are optional, but if the request comes
    from the QTUM Initiator, they are surely present */
 async function fulfillRequest(req){
+	console.log(req)
 	return new Promise(async function(resolve, reject){
 			let functionSelector = '', dataPrefix = '', encodedFulfill = '0x';
 			if (typeof req.functionSelector !== 'undefined'){
@@ -149,7 +150,6 @@ async function fulfillRequest(req){
 				gas: "0x98d4",
 				gasPrice: "0x28",
 				nonce: web3.utils.toHex(parseInt(currentNonce)),
-				to: req.address,
 				data: encodedFulfill,
 			}])
 			if (signed) {
