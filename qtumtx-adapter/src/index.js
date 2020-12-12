@@ -131,7 +131,6 @@ async function chainlinkAuth(outgoingToken){
    from the QTUM Initiator, they are surely present */
 async function fulfillRequest(req){
 	return new Promise(async function(resolve, reject){
-			console.log(req)
 			let functionSelector = '', dataPrefix = '', encodedFulfill = '0x';
 			if (typeof req.functionSelector !== 'undefined'){
 				functionSelector = req.functionSelector.slice(2);
@@ -142,34 +141,20 @@ async function fulfillRequest(req){
 			// Concatenate the data
 			encodedFulfill += functionSelector + dataPrefix + req.result.slice(2);
 			const gasPrice = parseInt(await rpc.getGasPrice() * 1.3);
-			console.log(gasPrice)
 			// TX params
-			console.log(currentNonce, encodedFulfill)
-			const tx = {
-				gas: 500000,
-				gasPrice: gasPrice,
-				nonce: parseInt(currentNonce),
-				to: req.address,
-				data: encodedFulfill,
-			};
-			// Sign the transaction with the adapter's private key
-			try {
+			// Sign the transaction with the adapter's private key (Janus already has a copy, no need to pass as argument)
 			const signed = await rpc.rawCall('eth_signTransaction', [{
-				gas: 500000,
-				gasPrice: gasPrice,
-				nonce: currentNonce,
+				from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9",
+				to: req.address,
+				gas: "0x98d4",
+				gasPrice: "0x28",
+				nonce: web3.utils.toHex(parseInt(currentNonce)),
 				to: req.address,
 				data: encodedFulfill,
-				from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9"
 			}])
-			console.log(signed)
-		} catch (e) {
-			console.log(JSON.stringify(e))
-		}
-		
-			rpc.sendTransaction(tx).then((txid) => {
-				console.log(txid)
-				rpc.getTransactionReceipt(txid.txid).then((receipt) => {
+			if (signed) {
+			rpc.rawCall('eth_sendRawTransaction', [signed]).then((txid) => {
+				rpc.rawCall('eth_getTransactionReceipt', [txid]).then((receipt) => {
 					console.info('Fulfill Request TX has been mined: ' + receipt.transactionHash);
 					if ((typeof receipt.status !== 'undefined') && (typeof receipt.logs !== 'undefined')){
 						// TODO: Save transaction history to database
@@ -180,8 +165,11 @@ async function fulfillRequest(req){
 					}else{
 						reject(receipt);
 					}
+				}).catch(async function (e) {
+					console.log(JSON.stringify(e))
 				})
 			}).catch(async function (e) {
+				console.log(e)
 			// If the nonce counter is wrong, correct it and try again
 			if (e.toString().indexOf('nonce too high') > -1 || e.toString().indexOf('Transaction was not mined within') > -1 || e.toString().indexOf('nonce too low') > -1 ){
 				console.info('There was a nonce mismatch, will correct it and try again...');
@@ -196,6 +184,7 @@ async function fulfillRequest(req){
 			}
 			})
 		}
+	}
 	)}
 /* Reads the database and returns the Chainlink Node auth data */
 function loadCredentials(){

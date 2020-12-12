@@ -192,38 +192,42 @@ async function newSubscription(jobId, oracleAddress){
 	console.info(`Subscribing to Oracle at ${oracleAddress} for requests to job ID ${jobId}...`);
 	let fromBlock = await rpc.getBlockNumber();
 	const toBlock = "latest"
-	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": ["4c26e18e9a205a51b10a02f051f1852bc318f666"], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', '3838306263306439326133363433653938623230316532373561653033636631']}, 1]).then((event) => {
+	let index = 0;
+	// Topics include OracleRequest event signature and hex job Id to wait for logs for the given job
+	qtumConnection.rawCall('waitforlogs', [fromBlock, null, {"addresses": [oracleAddress.split('0x')[1]], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.toHex(jobId).split('0x')[1]]}, 1]).then((event) => {
+		console.log(event)
 		try {
-			console.log(event)
 			// If an array key is not present for this log Id, create one
-			if (typeof Events[event.transactionHash] == 'undefined'){
-				Events[event.transactionHash] = [];
+			if (typeof Events[index] == 'undefined'){
+				Events[index] = [];
 			}
 			// Set the removed flag to false for this new log Id
-			Events[event.transactionHash].removed == false;
+			Events[index].removed == false;
 			// The timer variable to increment on every log check
 			let timer = 0;
 			// Check every 1 sec if there are changes in the log state
 			const checkLog = setInterval(() => {
 				timer++;
 				// If the log's new state is removed, discard it
-				// if (Events[event.transactionHash].removed == true){
-				// 	delete Events[event.transactionHash];
-				// 	clearInterval(checkLog);
-				// }
+				if (Events[index].removed == true){
+					delete Events[index];
+					clearInterval(checkLog);
+				}
 				// The Initiator will wait MIN_INCOMING_CONFIRMATIONS blocks (30 secs per block, plus 2 more secs)
 				// If the log remains unchanged after that, then will trigger the job run and delete the log from memory
 				// If there is a chain reorg longer than that, the job run will be triggered again
 				if (timer == ((confirmations * 30) + 2)){
-					delete Events[event.transactionHash];
+					delete Events[index];
 					clearInterval(checkLog);
-					const txid = event.entries[0].transactionHash
-					const result = qtumConnection.rawCall("gettransactionreceipt", [txid]).then((theResult) => {
+					let txid = event.entries[0].transactionHash
+					let result = qtumConnection.rawCall("gettransactionreceipt", [txid]).then((theResult) => {
 						let eventData = event.entries[0].data
-						console.log(theResult)
 						let topics = theResult[0].log[0].topics
-						triggerJobRun(eventData, topics, jobId, oracleAddress);
-						fromBlock = event.entries[0].nextblock
+						triggerJobRun(eventData, topics, jobId, oracleAddress).then((result) => {
+							if (result) {
+								index++;
+							}
+						})
 					})
 				}
 			}, 1000);

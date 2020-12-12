@@ -24,6 +24,11 @@ async function requestRIFPrice() {
   console.log(result, 'result')
 }
 
+async function requestCurrentPrice() {
+  console.log(consumerContract)
+  const result = await consumerContract.call("currentPrice()",[], opts)
+  console.log(result, 'result')
+}
 
 async function main() {
   const argv = parseArgs(process.argv.slice(2), {"string": '_'})
@@ -38,6 +43,9 @@ async function main() {
   switch (cmd) {
     case "requestRIFPrice":
       await requestRIFPrice()
+      break
+    case "requestCurrentPrice":
+      await requestCurrentPrice()
       break
     default:
       console.log("unrecognized command", cmd)

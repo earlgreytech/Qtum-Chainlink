@@ -52,7 +52,7 @@ After following the instructions for setting up Solar at https://github.com/qtum
 
 ## Connect your Chainlink node to QTUM Testnet
 
-Provided you have a functioning Chainlink node, and are interested in trying the QTUM Initiator and QTUMTX Adapters to interact with RSK Network, you can follow these instructions to get started.
+Provided you have a functioning Chainlink node, and are interested in trying the QTUM Initiator and QTUMTX Adapters to interact with QTUM Network, you can follow these instructions to get started.
 
 ### Prerequisites.
 
@@ -174,9 +174,9 @@ Now the only thing left to do is to test the request flow. First, login into the
 		{
 			"type": "external",
 			"params": {
-				"name": "QTUM_INITIATOR_NAME",
+				"name": "qtuminitiator",
 				"body": {
-					"address": "ORACLE_CONTRACT_ADDRESS"
+					"address": "0x9cb84d64A33B7Cc16C69b0e9642dCF1Dba13fef9"
 				}
 			}
 		}
@@ -195,7 +195,7 @@ Now the only thing left to do is to test the request flow. First, login into the
 			"type": "ethuint256"
 		},
 		{
-			"type": "QTUMTX_ADAPTER_NAME"
+			"type": "qtumtxadapter"
 		}
 	]
 }
