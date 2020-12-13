@@ -144,17 +144,24 @@ async function fulfillRequest(req){
 			const gasPrice = parseInt(await rpc.getGasPrice() * 1.3);
 			// TX params
 			// Sign the transaction with the adapter's private key (Janus already has a copy, no need to pass as argument)
-			const signed = await rpc.rawCall('eth_signTransaction', [{
+			// const signed = await rpc.rawCall('eth_signTransaction', [{
+			// 	from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9",
+			// 	to: req.address,
+			// 	gas: "0x98d4",
+			// 	gasPrice: "0x28",
+			// 	nonce: web3.utils.toHex(parseInt(currentNonce)),
+			// 	data: encodedFulfill,
+			// }])
+			// if (signed) {
+			rpc.sendTransaction({
 				from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9",
 				to: req.address,
 				gas: "0x98d4",
 				gasPrice: "0x28",
-				nonce: web3.utils.toHex(parseInt(currentNonce)),
+				nonce: web3.utils.toHex(parseInt(currentNonce) == 0 ? 179 : parseInt(currentNonce)),
 				data: encodedFulfill,
-			}])
-			if (signed) {
-			rpc.rawCall('eth_sendRawTransaction', [signed]).then((txid) => {
-				rpc.rawCall('eth_getTransactionReceipt', [txid]).then((receipt) => {
+			}).then((txid) => {
+				rpc.rawCall('eth_getTransactionReceipt', [txid.txid]).then((receipt) => {
 					console.info('Fulfill Request TX has been mined: ' + receipt.transactionHash);
 					if ((typeof receipt.status !== 'undefined') && (typeof receipt.logs !== 'undefined')){
 						// TODO: Save transaction history to database
@@ -183,7 +190,7 @@ async function fulfillRequest(req){
 				reject(e);
 			}
 			})
-		}
+		// }
 	}
 	)}
 /* Reads the database and returns the Chainlink Node auth data */
