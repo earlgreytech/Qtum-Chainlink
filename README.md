@@ -59,123 +59,31 @@ docker-compose down -v
 
 After following the instructions for setting up Solar at https://github.com/qtumproject/solar, you will likely need to add solar to your path for access in other directories.
 
-## Connect your Chainlink node to QTUM Testnet
+## LinkToken
 
-Provided you have a functioning Chainlink node, and are interested in trying the QTUM Initiator and QTUMTX Adapters to interact with QTUM Network, you can follow these instructions to get started.
+If you running this on a private QTUM network/regtest mode, you are going to need to deploy the LinkToken contract for further interaction with the services. You can deploy via Remix (point endpoint to http://localhost:23889) or Solar, but Remix may be a better choice to deploy as the majority of the other contracts we will be interacting with are not compatible with the LinkToken solidity version.
 
-### Prerequisites.
+## Oracle Contract
 
-You'll need to create a Postgres database for the Initiator and another for the Adapter. You can quickly set this up with the psql cli utility:
+To deploy the Oracle Contract, run the following command replacing LINKTOKEN_ADDRESS with the LinkToken Address from the previously deployed LinkToken smart contract.
 
-```bash
-psql -U postgres -c "create database qtum_initiator"
-psql -U postgres -c "create database qtumtx_adapter"
-```
+`cd testnet-deploy`
 
-### 1. Clone the repository and enter project directory
+`solar deploy contracts/Oracle.sol '[LINKTOKEN_ADDRESS]' --eth_rpc=http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889 --gasPrice=0.0000001 --force`
 
-```bash
-git clone https://github.com/BlockSpaces/Qtum-Chainlink.git && git checkout bugs-branch || git checkout development
-```
+Take note of the oracle contract address returned by Solar for use later.
 
-### 2. Configure the Initiator and Adapter
+Note: If an error is returned noting that localhost as the host name is incorrect, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
 
-Create an .env-testnet file for each service and set the configuration environment variables.
+Next, you will need to allow the adapter to fulfill oracle requests by running the following command.
 
-#### QTUM Initiator
+`node scripts/oracle-fulfill.js setFulfillmentPermission 0x7926223070547D2D15b2eF5e7383E541c338FfE9 true`
 
-| Key | Description | Example |
-|-----|-------------|---------|
-| `CHAINLINK_BASE_URL` | The URL of the Chainlink Core service with a trailing slash | `http://localhost:6688/` |
-| `DATABASE_URL` | The URL of the Postgres connection | `postgresql://user:passw@host:5432/dbname` |
-| `INITIATOR_HOST` | The hostname of the QTUM Initiator | `localhost` |
-| `INITIATOR_NAME` | The Initiator name that will be registered on Chainlink Core | `qtuminitiator` |
-| `INITIATOR_PORT` | The port where the Initiator service will be listening | `30055` |
-| `MIN_INCOMING_CONFIRMATIONS` | The number of blocks to wait before triggering a job run | `3` |
-| `QTUM_HOST` | The hostname of the QTUM Node RPC | `localhost` |
+## Job Creation via Chainlink Web UI
 
-#### QTUMTX Adapter
+After deploying the LinkToken and Oracle Contract and before proceeding to the creation of the consumer contract, you will want to create a Job for your Chainlink Node.
 
-| Key | Description | Example |
-|-----|-------------|---------|
-| `ADAPTER_HOST` | The hostname of the QTUMTX Adapter | `localhost` |
-| `ADAPTER_NAME` | The Adapter name that will be registered on Chainlink Core | `qtumtxadapter` |
-| `ADAPTER_PORT` | The port where the Adapter service will be listening | `30056` |
-| `CHAINLINK_BASE_URL` | The URL of the Chainlink Core service with a trailing slash | `http://localhost:6688/` |
-| `DATABASE_URL` | The URL of the Postgres connection | `postgresql://user:passw@host:5432/dbname` |
-| `QTUM_HOST` | The hostname of the RSK Node RPC | `localhost` |
-
-### 3. Configure Chainlink API credentials
-
-Create an .api file that will contain the auth credentials of your Chainlink node. The API e-mail should be in the first line, and the API password in the second line. Example:
-
-```
-admin@example.com
-changethis
-```
-
-### 4. Configure QTUMTX Adapter account
-
-The QTUMTX Adapter needs an account to sign and send the transactions to the network. To configure the account, save its private key in a file and reference it later when running the adapter. This account will need to have QTUM to pay for the transactions sent to the network. Testnet QTUM can be obtained by downloading https://github.com/qtumproject/janus and running `./fill_user_account.sh` script.
-
-### 5. Build the QTUM Initiator and QTUMTX Adapter Docker images 
-
-```bash
-docker build -t qtum-initiator-testnet -f ./qtum-initiator/Dockerfile.testnet .
-docker build -t qtumtx-adapter-testnet -f ./qtumtx-adapter/Dockerfile.testnet .
-```
-
-### 6. Run the services
-
-You can run the services containers in several ways. For the purpose of this quick guide, we'll use the docker run command. Be sure to pass the api credentials and make them available through the .api file in the destination paths /home/qtum-initiator/src/.api for the initiator, and /home/qtumtx-adapter/src/.api for the adapter. You need to do the same with the .adapterKey file when runnning the QTUMTX Adapter, also you need to load the environment variables from the .env-testnet file. In the example, optionally, a port parameter is added to map the service port to localhost.
-
-```bash
-docker run -v /path/to/host/api/file:/home/qtum-initiator/src/.api --env-file /path/to/initiator/.env-testnet -p 30055:30055 qtum-initiator-testnet
-docker run -v /path/to/host/api/file:/home/qtumtx-adapter/src/.api -v /path/to/host/adapterKey/file:/home/qtumtx-adapter/src/.adapterKey --env-file /path/to/adapter/.env-testnet -p 30056:30056 qtumtxk-adapter-testnet
-```
-The services will configure the database and register the Initiator and Adapter in Chainlink Core when first started.
-
-### 7. Deploy the Oracle contract to QTUM Testnet
-
-You'll need to deploy an Oracle contract on QTUM Testnet to be able to receive requests. In the directory testnet-deploy there are some useful scripts to accomplish this.
-* Edit the truffle-config.js to configure the QTUM node RPC connection.
-* Configure the account that will be used to deploy the contract. To do this, save its private key on the testnet-deploy/.deployerKey file. Remember this account needs to be funded with QTUM.
-* Edit the testnet-deploy/migrations/2_deploy_oracle.js and configure the ADAPTER_ADDRESS constant, setting the adapter's account address. This is needed so the migration script, after the contract deploy, can call the setFulfillmentPermission function on the contract to authorize the adapter address to fulfill Oracle's requests.
-* Step into the testnet-deploy directory, install the dependencies and run the first and second migrations using Truffle:
-
-```bash
-cd testnet-deploy
-npm install
-npx truffle migrate --f 1 --to 2 --network rskTestnet
-```
-
-**SECURITY WARNING**: This example has been created just for testing the QTUM Initiator and QTUMTx Adapter using the QTUM Testnet. It deploys a single sourced Oracle contract which does not use any of the Chainlink’s more advanced features such as: aggregation of data sources, slashing node deposits, etc. It's not recommended to run this setup on production in Mainnet. As a Node Operator, you should be familiar with the best practices:
-- [Best Security and Operating Practices](https://docs.chain.link/docs/best-security-practices)
-- [Setting-up failover redundant RSK node connections](https://github.com/Fiews/ChainlinkEthFailover)
-- [Enabling HTTPS connections](https://docs.chain.link/docs/enabling-https-connections)
-
-### 7. Deploy the Oracle contract to QTUM Testnet
-
-You'll need to deploy an Oracle contract on QTUM Testnet to be able to receive requests. In the directory testnet-deploy there are some useful scripts to accomplish this.
-* Edit the truffle-config.js to configure the QTUM node RPC connection.
-* Configure the account that will be used to deploy the contract. To do this, save its private key on the testnet-deploy/.deployerKey file. Remember this account needs to be funded with RBTC.
-* Edit the testnet-deploy/migrations/2_deploy_oracle.js and configure the ADAPTER_ADDRESS constant, setting the adapter's account address. This is needed so the migration script, after the contract deploy, can call the setFulfillmentPermission function on the contract to authorize the adapter address to fulfill Oracle's requests.
-* Step into the testnet-deploy directory, install the dependencies and run the first and second migrations using Truffle:
-
-```bash
-cd testnet-deploy
-npm install
-npx truffle migrate --f 1 --to 2 --network rskTestnet
-```
-
-**SECURITY WARNING**: This example has been created just for testing the RSK Initiator and RSKTx Adapter using the RSK Testnet. It deploys a single sourced Oracle contract which does not use any of the Chainlink’s more advanced features such as: aggregation of data sources, slashing node deposits, etc. It's not recommended to run this setup on production in Mainnet. As a Node Operator, you should be familiar with the best practices:
-- [Best Security and Operating Practices](https://docs.chain.link/docs/best-security-practices)
-- [Setting-up failover redundant RSK node connections](https://github.com/Fiews/ChainlinkEthFailover)
-- [Enabling HTTPS connections](https://docs.chain.link/docs/enabling-https-connections)
-
-### 8. Create a test job
-
-Now the only thing left to do is to test the request flow. First, login into the Chainlink Operator WebUI and create a new job that uses the QTUM Initiator and the QTUMTX Adapter. You'll need to replace QTUM_INITIATOR_NAME, ORACLE_CONTRACT_ADDRESS and QTUMTX_ADAPTER_NAME with your values.
+Use the following template to create the job, replacing ORACLE_CONTRACT_ADDRESS with the Oracle Contract address returned from solar.
 
 ```json
 {
@@ -185,7 +93,7 @@ Now the only thing left to do is to test the request flow. First, login into the
 			"params": {
 				"name": "qtuminitiator",
 				"body": {
-					"address": "0x9cb84d64A33B7Cc16C69b0e9642dCF1Dba13fef9"
+					"address": ORACLE_CONTRACT_ADDRESS
 				}
 			}
 		}
@@ -209,87 +117,18 @@ Now the only thing left to do is to test the request flow. First, login into the
 	]
 }
 ```
+Take note of the Job Id use https://web3-type-converter.onbrn.com/ or a different method to convert the string returned to bytes32.
 
-### 9. Deploy a Consumer contract
 
-Once the Oracle and Job are configured, the only missing piece is a client contract that requests the data. To do this:
-* Edit the file testnet-deploy/migrations/3_deploy_consumer.js and configure the JOB_SPEC constant with the Job ID of the job created in the previous step.
-* Make sure you are standing in the testnet-deploy directory and run the third truffle migration.
+## Consumer Contract
 
-```bash
-npx truffle migrate --f 3 --to 3 --network rskTestnet
-```
+The consumer contract will allow you to `requestRIFPrice` and return the `price`, run the following command replacing LINKTOKEN_ADDRESS, ORACLE_CONTRACT_ADDRESS, and BYTES32_JOB_ID with the previous collected values.
 
-**SECURITY WARNING**: In production on Mainnet, deploying a single Consumer contract that uses only one Oracle is not recommended. To consume price data an Aggregator should be used instead. There are code examples in Chainlink docs for consuming Aggregators.
-- [Get the Latest Price](https://docs.chain.link/docs/get-the-latest-price)
-- [Aggregator Interface API Reference](https://docs.chain.link/docs/price-feeds-api-reference)
+`cd testnet-deploy`
 
-### 10. Fund the Consumer contract
+`solar deploy contracts/Consumer.sol '[LINKTOKEN_ADDRESS, ORACLE_CONTRACT_ADDRESS, BYTES32_JOB_ID]' --eth_rpc=http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889 --gasPrice=0.0000001 --force`
 
-The Consumer contract will need rKovLINK to pay the Oracle. To get rKovLINK, first you'll need to get Kovan LINK and transfer them to the RSK Testnet through the RSK Token Bridge.
-* Get Kovan LINK through the Kovan LINK faucet: https://kovan.chain.link/
-* Convert the Kovan LINKs to rKovLINKs using the RSK Token Bridge: https://tokenbridge.rsk.co/
-* Send some rKovLINKs to the Consumer Contract address.
+Note: If an error is returned noting that localhost as the host name is incorrect, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
 
-### 11. Request data
+Next, you will run `node scripts/consumer-request.js requestRIFPrice` which will broadcast a Chainlink Request, the external initiator will pick up on a new subscription from the Chainlink Node, encode the data and initiate a job run, making a POST request to the /adapter endpoint which will fulfill the Oracle Request and post the data on-chain via the qtumtxadapter.
 
-To trigger a job request, there's a Truffle script that can be run to quickly send a test request. Standing on testnet-deploy directory:
-
-```bash
-npx truffle exec scripts/consumer-request.js --network rskTestnet
-```
-## Price Feed Contracts ##
-
-### RSK Testnet
-
-| Pair | New Contract |
-|-----|-------------|
-| RIF/BTC |  [0xd793fd691df2934b412e250460bed76d807f05eb](https://explorer.testnet.rsk.co/address/0xd793fd691df2934b412e250460bed76d807f05eb) |
-
-## Add your Chainlink node to the RIF/BTC Price Reference Aggregator running on RSK Testnet
-
-### Configure a job in Chainlink to get RIF/USD price from Liquid.com
-
-Login to the Chainlink Operator WebUI and add the following job. Replace RSK_INITIATOR_NAME, ORACLE_CONTRACT_ADDRESS and RSKTX_ADAPTER_NAME with your values. For the purpose of adding the node to the testnet Reference Aggregator, configure the tasks to fetch last traded price of RIF/BTC pair on Liquid.com exchange. Once this step is ready, provide the JobID and Oracle contract address to the Aggregator owners to be included.
-
-```json
-{
-	"initiators": [
-		{
-			"type": "external",
-			"params": {
-				"name": "RSK_INITIATOR_NAME",
-				"body": {
-					"address": "ORACLE_CONTRACT_ADDRESS"
-				}
-			}
-		}
-	],
-	"tasks": [
-		{
-			"type": "httpget",
-			"params": {
-				"get": "https://api.liquid.com/products/580"
-			}
-		},
-		{
-			"type": "jsonparse",
-			"params": {
-				"path": "last_traded_price"
-			}
-		},
-		{
-			"type": "multiply",
-			"params": {
-				"times": 100000000
-			}
-		},
-		{
-			"type": "ethuint256"
-		},
-		{
-			"type": "RSKTX_ADAPTER_NAME"
-		}
-	]
-}
-```
