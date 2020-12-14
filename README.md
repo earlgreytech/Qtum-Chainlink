@@ -44,6 +44,7 @@ After installing and running, you will want to export the `/bin` folder to your 
 
 `./fill_user_account.sh`
 
+`await` an array of hashes to return to the console. ;)
 ## Build qtumjs-eth
 
 The qtumjs-eth package requires running an internal build command, so before proceeding to the next step, follow the following instructions to avoid module not found issues.
