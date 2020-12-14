@@ -180,7 +180,7 @@ async function fulfillRequest(req){
 				reject(e);
 			}
 			})
-å	}
+	}
 	)}
 /* Reads the database and returns the Chainlink Node auth data */
 function loadCredentials(){

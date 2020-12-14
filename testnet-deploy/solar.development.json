@@ -221,9 +221,9 @@
       "binhash": "0xf6ccc7dd2d0192bba1eebcf56083db6e570f62b3a73aff26871c78aa81eafced",
       "name": "Consumer",
       "deployName": "contracts/Consumer.sol",
-      "address": "0xb90829a5b99ae10b94f274c3e88eeaf04f46f90e",
-      "txid": "0x87cdba5dc25535728535a50dc60e547a7a66756f5a7bd6740afd0ddb7371b45d",
-      "createdAt": "2020-12-13T16:21:09.468947-05:00",
+      "address": "0xef6c322a3a6989e881143e71e95a6b3034c1180e",
+      "txid": "0x018c654de7e0c67038153d740763f67ac281b43b46260408fdc55208ff121274",
+      "createdAt": "2020-12-14T12:51:20.942702-05:00",
       "confirmed": true,
       "sender": "0x7926223070547d2d15b2ef5e7383e541c338ffe9"
     },
@@ -642,9 +642,9 @@
       "binhash": "0xb345ee7afc5b1057ad489bd4d1f9c8ff6e2cc8c0dddb4e7ec2b9dc2e805ad1c8",
       "name": "Oracle",
       "deployName": "contracts/Oracle.sol",
-      "address": "0x42f56e005378184b7e4947e42dd8dd8ba4adb8c2",
-      "txid": "0xff2df33b89fed1cdc934a7ebf56972f422a86548f0c581f461d836d9d7f0c383",
-      "createdAt": "2020-12-13T16:11:37.881291-05:00",
+      "address": "0xc0324e7957d0284c63c754aa3eb08473644f5485",
+      "txid": "0xb1c6add39e0839b1b4e2cb6fff0ef174b3a243cf5cc32e653c2ebb5428048923",
+      "createdAt": "2020-12-14T12:49:35.286736-05:00",
       "confirmed": true,
       "sender": "0x7926223070547d2d15b2ef5e7383e541c338ffe9"
     }
