@@ -18,14 +18,6 @@ const qtumConnection = new QtumRPC('http://qtum:testpasswd@qtum:3889')
 // The OracleRequest event ABI for decoding the event logs
 const oracleRequestAbi = [{ "indexed": true, "name": "specId", "type": "bytes32" }, { "indexed": false, "name": "requester", "type": "address" }, { "indexed": false, "name": "requestId", "type": "bytes32" }, { "indexed": false, "name": "payment", "type": "uint256" }, { "indexed": false, "name": "callbackAddr", "type": "address" }, { "indexed": false, "name": "callbackFunctionId", "type": "bytes4" }, { "indexed": false, "name": "cancelExpiration", "type": "uint256" }, { "indexed": false, "name": "dataVersion", "type": "uint256" }, { "indexed": false, "name": "data", "type": "bytes" }];
 
-
-// const repoData = require("../solar.development.json")
-// const {
-//   sender, ...info
-// } = repoData.contracts['../../testnet-deploy/contracts/Oracle.sol']
-
-// const oracleContract = new qtum.Contract(rpc, info)
-
 const app = express();
 const port = process.env.INITIATOR_PORT || 30055;
 const confirmations = process.env.MIN_INCOMING_CONFIRMATIONS || 2;
