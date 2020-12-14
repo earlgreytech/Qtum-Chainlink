@@ -141,6 +141,7 @@ async function fulfillRequest(req){
 			// Concatenate the data
 			encodedFulfill += functionSelector + dataPrefix + req.result.slice(2);
 			const gasPrice = parseInt(await rpc.getGasPrice() * 1.3);
+			console.log(currentNonce)
 			// TX params
 			// Sign the transaction with the adapter's private key (Janus already has a copy, no need to pass as argument)
 			rpc.sendTransaction({

@@ -30,6 +30,16 @@ to work with the SideToken.
 
 [Install Docker](https://docs.docker.com/get-docker/)
 
+## Build qtumjs-eth
+
+The qtumjs-eth package requires running an internal build command, so before proceeding to the next step, follow the following instructions to avoid module not found issues.
+
+`cd qtum-initiator/src && yarn`
+
+`cd qtumtx-adapter/src && yarn`
+
+`cd testnetdeploy && yarn`
+
 ## Run Local Development Setup
 
 To start the services, simply run:
