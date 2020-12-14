@@ -157,8 +157,8 @@ async function fulfillRequest(req){
 				from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9",
 				to: req.address,
 				gas: "0x98d4",
-				gasPrice: "0x28",
-				nonce: web3.utils.toHex(parseInt(currentNonce) == 0 ? 179 : parseInt(currentNonce)),
+				gasPrice: "0x64",
+				nonce: web3.utils.toHex(parseInt(currentNonce) == 0 ? 132 : parseInt(currentNonce)),
 				data: encodedFulfill,
 			}).then((txid) => {
 				rpc.rawCall('eth_getTransactionReceipt', [txid.txid]).then((receipt) => {
