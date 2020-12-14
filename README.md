@@ -75,7 +75,9 @@ Take note of the oracle contract address returned by Solar for use later.
 
 Note: If an error is returned noting that localhost as the host name is incorrect, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
 
-Next, you will need to allow the adapter to fulfill oracle requests by running the following command.
+Next, you will need to set the ETH_RPC environment variable and allow the adapter to fulfill oracle requests by running the following command.
+
+`export ETH_RPC=http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889`
 
 `node scripts/oracle-fulfill.js setFulfillmentPermission 0x7926223070547D2D15b2eF5e7383E541c338FfE9 true`
 
