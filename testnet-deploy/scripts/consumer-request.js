@@ -16,7 +16,7 @@ const {
 } = repoData.contracts['contracts/Consumer.sol']
 const consumerContract = new qtum.Contract(rpc, info)
 
-const opts = {gasPrice: "0x64", gasLimit: "0x493e0"}
+const opts = {gasPrice: "0x64", gasLimit: "0x2dc6c0"}
 
 async function requestRIFPrice() {
   console.log(consumerContract)

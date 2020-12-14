@@ -146,7 +146,7 @@ async function chainlinkAuth(outgoingToken){
 			const signed = await rpc.rawCall('eth_signTransaction', [{
 				from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9",
 				to: req.address,
-				gas: "0x30d40",
+				gas: "0x2dc6c0",
 				gasPrice: "0x64",
 				nonce: web3.utils.toHex(parseInt(currentNonce)),
 				data: encodedFulfill,
