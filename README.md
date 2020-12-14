@@ -24,7 +24,7 @@ back to the contract that originally created the event log, just like the native
 - `Oracle`, the Oracle contract is the 0.5 version, with a single modification on the onTokenTransfer function of the LinkTokenReceiver to be able
 to work with the SideToken.
 - `Link`, is the contract that will be deployed on the QTUM network, mirroring the LinkToken contract deployed on Ethereum network (deployed via Remix as it has a different solc version than majority of contracts).
-- `Consumer`, is the contract that will request the data to the Oracle. On test run, it will request last traded price of RIF/BTC pair from Liquid.com exchange.
+- `Consumer`, is the contract that will request the data to the Oracle. On test run, it will request last traded price of QTUM/BTC pair from Liquid.com exchange.
 
 ## Install
 
@@ -139,7 +139,7 @@ Take note of the Job Id use https://web3-type-converter.onbrn.com/ or a differen
 
 ## Consumer Contract
 
-The consumer contract will allow you to `requestRIFPrice` and return the `price`, run the following command replacing LINKTOKEN_ADDRESS, ORACLE_CONTRACT_ADDRESS, and BYTES32_JOB_ID with the previous collected values.
+The consumer contract will allow you to `requestQTUMPrice` and return the `price`, run the following command replacing LINKTOKEN_ADDRESS, ORACLE_CONTRACT_ADDRESS, and BYTES32_JOB_ID with the previous collected values.
 
 `cd testnet-deploy`
 
@@ -147,7 +147,7 @@ The consumer contract will allow you to `requestRIFPrice` and return the `price`
 
 Note: If an error is returned noting that localhost as the host name is incorrect, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
 
-Next, you will run `node scripts/consumer-request.js requestRIFPrice` which will broadcast a Chainlink Request, the external initiator will pick up on a new subscription from the Chainlink Node, encode the data and initiate a job run, triggering a POST request to the /adapter endpoint which will fulfill the Oracle Request and post the data on-chain via the qtumtxadapter.
+Next, you will run `node scripts/consumer-request.js requestQTUMPrice` which will broadcast a Chainlink Request, the external initiator will pick up on a new subscription from the Chainlink Node, encode the data and initiate a job run, triggering a POST request to the /adapter endpoint which will fulfill the Oracle Request and post the data on-chain via the qtumtxadapter.
 
 We should now be able to query the `price` by running the following command...
 

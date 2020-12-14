@@ -187,6 +187,7 @@ async function newSubscription(jobId, oracleAddress) {
 	// Topics include OracleRequest event signature and hex job Id to wait for logs for the given job
 	const waitForLogsRequest = () => qtumConnection.rawCall('waitforlogs', [fromBlock, null, { "addresses": [oracleAddress.split('0x')[1]], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.toHex(jobId).split('0x')[1]] }, 1]).then((event) => {
 		try {
+			console.log(event)
 			// If an array key is not present for this log Id, create one
 			if (typeof Events[index] == 'undefined') {
 				Events[index] = [];

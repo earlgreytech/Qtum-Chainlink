@@ -1,4 +1,4 @@
-/* Script that requests RIF/BTC price to the Consumer contract */
+/* Script that requests QTUM/BTC price to the Consumer contract */
 const url = require('url');
 
 const rpcURL =  process.env.ETH_RPC;
@@ -18,9 +18,9 @@ const consumerContract = new qtum.Contract(rpc, info)
 
 const opts = {gasPrice: "0x64", gasLimit: "0x2dc6c0"}
 
-async function requestRIFPrice() {
+async function requestQTUMPrice() {
   console.log(consumerContract)
-  const result = await consumerContract.send("requestRIFPrice()",[], opts)
+  const result = await consumerContract.send("requestQTUMPrice()",[], opts)
   console.log(result, 'result')
 }
 
@@ -41,8 +41,8 @@ async function main() {
   }
 
   switch (cmd) {
-    case "requestRIFPrice":
-      await requestRIFPrice()
+    case "requestQTUMPrice":
+      await requestQTUMPrice()
       break
     case "requestCurrentPrice":
       await requestCurrentPrice()

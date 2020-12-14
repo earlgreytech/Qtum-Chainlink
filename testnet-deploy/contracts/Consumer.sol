@@ -17,13 +17,13 @@ contract Consumer is ChainlinkClient {
     specId = _specId;
   }
 
-  function requestRIFPrice() public {
-    requestRIFPriceByCallback(address(this));
+  function requestQTUMPrice() public {
+    requestQTUMPriceByCallback(address(this));
   }
 
-  function requestRIFPriceByCallback(address _callback) public {
+  function requestQTUMPriceByCallback(address _callback) public {
     Chainlink.Request memory req = buildChainlinkRequest(specId, _callback, this.fulfill.selector);
-    req.add("get", "https://api.liquid.com/products/580");
+    req.add("get", "https://api.liquid.com/products/133");
     req.add("path", "last_traded_price");
     req.addInt("times", 100000000);
     sendChainlinkRequest(req, 0);
