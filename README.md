@@ -130,5 +130,9 @@ The consumer contract will allow you to `requestRIFPrice` and return the `price`
 
 Note: If an error is returned noting that localhost as the host name is incorrect, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
 
-Next, you will run `node scripts/consumer-request.js requestRIFPrice` which will broadcast a Chainlink Request, the external initiator will pick up on a new subscription from the Chainlink Node, encode the data and initiate a job run, making a POST request to the /adapter endpoint which will fulfill the Oracle Request and post the data on-chain via the qtumtxadapter.
+Next, you will run `node scripts/consumer-request.js requestRIFPrice` which will broadcast a Chainlink Request, the external initiator will pick up on a new subscription from the Chainlink Node, encode the data and initiate a job run, triggering a POST request to the /adapter endpoint which will fulfill the Oracle Request and post the data on-chain via the qtumtxadapter.
+
+We should now be able to query the `price` by running the following command...
+
+`node scripts/consumer-request.js requestCurrentPrice`
 
