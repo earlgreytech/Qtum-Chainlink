@@ -128,7 +128,7 @@ async function chainlinkAuth(outgoingToken){
 /* Fulfills a Chainlink request sending the given data to the specified address.
    functionSelector and dataPrefix params are optional, but if the request comes
    from the QTUM Initiator, they are surely present */
-async function fulfillRequest(req){
+   async function fulfillRequest(req){
 	console.log(req)
 	return new Promise(async function(resolve, reject){
 			let functionSelector = '', dataPrefix = '', encodedFulfill = '0x';
@@ -141,18 +141,19 @@ async function fulfillRequest(req){
 			// Concatenate the data
 			encodedFulfill += functionSelector + dataPrefix + req.result.slice(2);
 			const gasPrice = parseInt(await rpc.getGasPrice() * 1.3);
-			console.log(currentNonce)
 			// TX params
 			// Sign the transaction with the adapter's private key (Janus already has a copy, no need to pass as argument)
-			rpc.sendTransaction({
+			const signed = await rpc.rawCall('eth_signTransaction', [{
 				from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9",
 				to: req.address,
-				gas: "0xea60",
+				gas: "0x30d40",
 				gasPrice: "0x64",
 				nonce: web3.utils.toHex(parseInt(currentNonce)),
 				data: encodedFulfill,
-			}).then((txid) => {
-				rpc.rawCall('eth_getTransactionReceipt', [txid.txid]).then((receipt) => {
+			}])
+			if (signed) {
+			rpc.rawCall('eth_sendRawTransaction', [signed]).then((txid) => {
+				rpc.rawCall('eth_getTransactionReceipt', [txid]).then((receipt) => {
 					console.info('Fulfill Request TX has been mined: ' + receipt.transactionHash);
 					if ((typeof receipt.status !== 'undefined') && (typeof receipt.logs !== 'undefined')){
 						// TODO: Save transaction history to database
@@ -181,8 +182,9 @@ async function fulfillRequest(req){
 				reject(e);
 			}
 			})
+		}
 	}
-	)}
+)}
 /* Reads the database and returns the Chainlink Node auth data */
 function loadCredentials(){
 	return new Promise(async function (resolve, reject){
