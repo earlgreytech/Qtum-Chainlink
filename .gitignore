@@ -7,5 +7,4 @@ qtumtx-adapter/.env-testnet
 testnet-deploy/.deployerKey
 testnet-deploy/build
 testnet-deploy/package-lock.json
-.adapterKey
 .api

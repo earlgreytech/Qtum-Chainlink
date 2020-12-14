@@ -17,8 +17,7 @@ This boilerplate has 6 services, each running in its own Docker container
 - `qtum-initiator`, an external initiator connected to the QTUM node that reads the event log from an Oracle contract and invokes a job run. A new
 run created by the QTUM Initiator is automatically given the parameters needed for the QTUM TX adapter task to report the run
 back to the contract that originally created the event log, just like the native Runlog initiator.
-- `qtumtx-adapter`, an external adapter connected to the QTUM node that takes the input given and places it into the data field of a transaction,
-just like the native EthTx adapter. It then signs the transaction and sends it to an address on QTUM network.
+- `qtumtx-adapter`, an external adapter connected to the QTUM node that takes the input given and places it into the data field of a transaction, just like the native EthTx adapter. It then signs the transaction and sends it to an address on QTUM network.
 
 ## Contracts:
 

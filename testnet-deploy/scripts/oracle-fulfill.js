@@ -1,4 +1,4 @@
-/* Script that sets fullfilment permission for Adapter to fulfill oracle requests*/
+/* Script that sets fullfilment permission for Adapter to fulfill oracle requests */
 const url = require('url');
 
 const rpcURL =  process.env.ETH_RPC;

@@ -144,15 +144,6 @@ async function fulfillRequest(req){
 			const gasPrice = parseInt(await rpc.getGasPrice() * 1.3);
 			// TX params
 			// Sign the transaction with the adapter's private key (Janus already has a copy, no need to pass as argument)
-			// const signed = await rpc.rawCall('eth_signTransaction', [{
-			// 	from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9",
-			// 	to: req.address,
-			// 	gas: "0x98d4",
-			// 	gasPrice: "0x28",
-			// 	nonce: web3.utils.toHex(parseInt(currentNonce)),
-			// 	data: encodedFulfill,
-			// }])
-			// if (signed) {
 			rpc.sendTransaction({
 				from: "0x7926223070547d2d15b2ef5e7383e541c338ffe9",
 				to: req.address,
@@ -190,8 +181,7 @@ async function fulfillRequest(req){
 				reject(e);
 			}
 			})
-		// }
-	}
+å	}
 	)}
 /* Reads the database and returns the Chainlink Node auth data */
 function loadCredentials(){
