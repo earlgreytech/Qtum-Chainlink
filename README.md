@@ -30,6 +30,20 @@ to work with the SideToken.
 
 [Install Docker](https://docs.docker.com/get-docker/)
 
+## Install QTUM Core
+
+Install qtum here: https://github.com/qtumproject/qtum/releases
+
+After installing and running, you will want to export the `/bin` folder to your PATH.
+
+## Fill QTUM Accounts for Gas
+
+`cd docker/standalone`
+
+`chmod 755 fill_user_account.sh`
+
+`./fill_user_account.sh`
+
 ## Build qtumjs-eth
 
 The qtumjs-eth package requires running an internal build command, so before proceeding to the next step, follow the following instructions to avoid module not found issues.
