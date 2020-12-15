@@ -185,9 +185,9 @@ async function newSubscription(jobId, oracleAddress) {
 	let fromBlock = await rpc.getBlockNumber();
 	let index = 0;
 	// Topics include OracleRequest event signature and hex job Id to wait for logs for the given job
-	const waitForLogsRequest = () => qtumConnection.rawCall('waitforlogs', [fromBlock, null, { "addresses": [oracleAddress.split('0x')[1]], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.toHex(jobId).split('0x')[1]] }, 1]).then((event) => {
+	const waitForLogsRequest = (from) => qtumConnection.rawCall('waitforlogs', [from, null, { "addresses": [oracleAddress.split('0x')[1]], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.toHex(jobId).split('0x')[1]] }, 1]).then((event) => {
 		// Temporary workaround for one log per block
-		if (event.entries.length > 0) {
+		if (typeof event.entries[index] !== 'undefined') {
 			try {
 				// If an array key is not present for this log Id, create one
 				if (typeof Events[index] == 'undefined') {
@@ -211,16 +211,22 @@ async function newSubscription(jobId, oracleAddress) {
 					if (timer == ((confirmations * 30) + 2)) {
 						delete Events[index];
 						clearInterval(checkLog);
-						let txid = event.entries[0].transactionHash
+						let txid = event.entries[index].transactionHash
 						let result = qtumConnection.rawCall("gettransactionreceipt", [txid]).then((theResult) => {
-							let eventData = event.entries[0].data
-							let topics = theResult[0].log[0].topics
-							index++;
+							let eventData = event.entries[index].data
+							let topics = theResult[index].log[index].topics
 							triggerJobRun(eventData, topics, jobId, oracleAddress)
-							// Update fromBlock to prevent infinite loop
-							fromBlock = event.entries[0].nextblock
 							// Call itself after triggering job run to reset.
-							waitForLogsRequest()
+							rpc.getBlockNumber().then((newFromBlock) => {
+								if (from !== newFromBlock) {
+									index = 0
+									waitForLogsRequest(newFromBlock)
+								}
+								else {
+									index++;
+									waitForLogsRequest(fromBlock)
+								}
+							})
 						})
 					}
 				}, 1000);
@@ -229,12 +235,14 @@ async function newSubscription(jobId, oracleAddress) {
 			}
 		}
 		else {
-			waitForLogsRequest()
+			rpc.getBlockNumber().then((newFromBlock) => {
+				waitForLogsRequest(newFromBlock)
+			})
 		}
 	}).catch((e) => {
 		console.log(e)
 	})
-	waitForLogsRequest()
+	waitForLogsRequest(fromBlock)
 }
 
 /* Saves a new subscription to database */
