@@ -97,8 +97,8 @@ app.post("/adapter", async (req, res) => {
 async function adapterSetup() {
 	try {
 		// Configures the JSON-RPC connection to the QTUM Network.
-		const connection = await setupNetwork(QTUM_CONFIG);
-		console.info(`QTUM is connected to the ${QTUM_CONFIG.name} node.`);
+		const connection = await setupNetwork(JANUS_CONFIG);
+		console.info(`QTUM is connected to the ${JANUS_CONFIG.name} node.`);
 		// Initialize currentNonce variable with current account's TX count, may need pending here
 		currentNonce = await rpc.getTransactionCount('qUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW', 'pending');
 	} catch (e) {

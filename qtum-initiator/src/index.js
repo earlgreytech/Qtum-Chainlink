@@ -123,8 +123,8 @@ async function chainlinkAuth(outgoingAccessKey, outgoingSecret) {
 async function initiatorSetup() {
 	try {
 		// Configures the JSON-RPC connection to the QTUM Network.
-		const connection = await setupNetwork(QTUM_CONFIG);
-		console.info(`QTUM is connected to the ${QTUM_CONFIG.name} node.`);
+		const connection = await setupNetwork(JANUS_CONFIG);
+		console.info(`QTUM is connected to the ${JANUS_CONFIG.name} node.`);
 		// Load the subscriptions from database
 		let subs = await loadSubscriptions();
 		if (subs.length > 0) {
@@ -269,7 +269,7 @@ async function setupCredentials() {
 function setupNetwork(node) {
 	return new Promise(async function (resolve, reject) {
 		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
-		// Checks to see if connection is succesful
+		// Checks to see if connection is successful
 		rpc.getBlockNumber().then((value) => {
 			resolve(rpc)
 		}).catch((e) => {
