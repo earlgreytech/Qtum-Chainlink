@@ -8,7 +8,7 @@ const url = require('url');
 const Web3 = require('web3');
 require('console-stamp')(console);
 const qtum = require("qtumjs-eth")
-const rpcURL = process.env.JANUS_URL || 'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889';
+const rpcURL = process.env.JANUS_URL || 'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.15:23889';
 const qtumAccount = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 const { QtumRPC } = require('qtumjs')
@@ -23,7 +23,7 @@ let currentNonce;
 // Setup different configurations if the project is running from inside a Docker container. If not, use defaults
 const JANUS_NODE = {
 	protocol: 'http',
-	host: process.env.JANUS_HOST || '0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost',
+	host: process.env.JANUS_HOST || '0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.15',
 	port: process.env.JANUS_PORT || 23889,
 };
 const JANUS_CONFIG = {
