@@ -8,9 +8,8 @@ const fs = require('fs');
 const Web3 = require('web3');
 const db = require('./db.js');
 require('console-stamp')(console);
-const { Qweb3 } = require('qweb3')
 const qtum = require("qtumjs-eth")
-const rpcURL = 'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.15:23889';
+const rpcURL = process.env.JANUS_URL || 'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889';
 const qtumAccount = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 const { QtumRPC } = require('qtumjs')
@@ -20,27 +19,25 @@ const oracleRequestAbi = [{ "indexed": true, "name": "specId", "type": "bytes32"
 
 const app = express();
 const port = process.env.INITIATOR_PORT || 30055;
-const confirmations = process.env.MIN_INCOMING_CONFIRMATIONS || 2;
+const confirmations = 6;
 
 
 let web3 = new Web3()
-let qweb3 = new Qweb3('http://qtum:testpasswd@qtum:3889')
 // The Subscriptions array holds the current job/oracle pairs that needs to be watched for events
 let Subscriptions = [];
 // The Events array holds the current event logs being processed for every jobId. Allows for chain reorg protection.
 let Events = [];
 
 // Setup different configurations if the project is running from inside a Docker container. If not, use defaults
-const QTUM_NODE = {
+const JANUS_NODE = {
 	protocol: 'http',
-	host: '0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.254',
-	port: 23889,
-	url: ''
+	host: process.env.JANUS_HOST || '0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost',
+	port: process.env.JANUS_PORT || 23889,
 };
-const QTUM_CONFIG = {
-	'name': 'QTUM',
-	'shortname': 'regtest',
-	'url': `${QTUM_NODE.protocol}://${QTUM_NODE.host}:${QTUM_NODE.port}`
+const JANUS_CONFIG = {
+	'name': 'JANUS',
+	'shortname': 'ETH JSON-RPC ADAPTER',
+	'url': `http://${JANUS_NODE.host}:${JANUS_NODE.port}`
 };
 
 // Initialize the Chainlink API Client without credentials, the initiator will login using the access key and secret
@@ -186,63 +183,38 @@ async function newSubscription(jobId, oracleAddress) {
 	let index = 0;
 	// Topics include OracleRequest event signature and hex job Id to wait for logs for the given job
 	const waitForLogsRequest = (from) => qtumConnection.rawCall('waitforlogs', [from, null, { "addresses": [oracleAddress.split('0x')[1]], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.toHex(jobId).split('0x')[1]] }, 1]).then((event) => {
-		// Temporary workaround for one log per block
 		if (typeof event.entries[index] !== 'undefined') {
 			try {
-				// If an array key is not present for this log Id, create one
-				if (typeof Events[index] == 'undefined') {
-					Events[index] = [];
-				}
-				// Set the removed flag to false for this new log Id
-				Events[index].removed == false;
-				// The timer variable to increment on every log check
-				let timer = 0;
-				// Check every 1 sec if there are changes in the log state
-				const checkLog = setInterval(() => {
-					timer++;
-					// If the log's new state is removed, discard it
-					if (Events[index].removed == true) {
-						delete Events[index];
-						clearInterval(checkLog);
-					}
-					// The Initiator will wait MIN_INCOMING_CONFIRMATIONS blocks (30 secs per block, plus 2 more secs)
-					// If the log remains unchanged after that, then will trigger the job run and delete the log from memory
-					// If there is a chain reorg longer than that, the job run will be triggered again
-					if (timer == ((confirmations * 30) + 2)) {
-						delete Events[index];
-						clearInterval(checkLog);
-						let txid = event.entries[index].transactionHash
-						let result = qtumConnection.rawCall("gettransactionreceipt", [txid]).then((theResult) => {
-							let eventData = event.entries[index].data
-							let topics = theResult[index].log[index].topics
-							triggerJobRun(eventData, topics, jobId, oracleAddress)
-							// Call itself after triggering job run to reset.
-							rpc.getBlockNumber().then((newFromBlock) => {
-								if (from !== newFromBlock) {
-									index = 0
-									waitForLogsRequest(newFromBlock)
-								}
-								else {
-									index++;
-									waitForLogsRequest(fromBlock)
-								}
-							})
-						})
-					}
-				}, 1000);
+				let txid = event.entries[index].transactionHash
+				qtumConnection.rawCall("gettransactionreceipt", [txid]).then((theResult) => {
+					let eventData = event.entries[index].data
+					let topics = theResult[index].log[index].topics
+					triggerJobRun(eventData, topics, jobId, oracleAddress)
+					// Call itself after triggering job run to reset.
+					rpc.getBlockNumber().then((newFromBlock) => {
+						if (from !== newFromBlock) {
+							index = 0
+							waitForLogsRequest(newFromBlock)
+						}
+						else {
+							index++;
+							waitForLogsRequest(fromBlock)
+						}
+					})
+				})
 			} catch (e) {
-				console.error(e);
-			}
+			console.error(e);
 		}
+	}
 		else {
-			rpc.getBlockNumber().then((newFromBlock) => {
-				waitForLogsRequest(newFromBlock)
-			})
-		}
-	}).catch((e) => {
-		console.log(e)
-	})
-	waitForLogsRequest(fromBlock)
+		rpc.getBlockNumber().then((newFromBlock) => {
+			waitForLogsRequest(newFromBlock)
+		})
+	}
+}).catch ((e) => {
+	console.log(e)
+})
+waitForLogsRequest(fromBlock)
 }
 
 /* Saves a new subscription to database */

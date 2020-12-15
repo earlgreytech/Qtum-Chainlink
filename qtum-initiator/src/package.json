@@ -19,7 +19,6 @@
 		"pg": "^8.3.0",
 		"qtumjs": "^1.9.3",
 		"qtumjs-eth": "ceoimon/qtumjs-eth#master",
-		"qweb3": "^1.2.2",
 		"web3": "^1.2.7"
 	},
 	"devDependencies": {
