@@ -25,8 +25,6 @@ const confirmations = 6;
 let web3 = new Web3()
 // The Subscriptions array holds the current job/oracle pairs that needs to be watched for events
 let Subscriptions = [];
-// The Events array holds the current event logs being processed for every jobId. Allows for chain reorg protection.
-let Events = [];
 
 // Setup different configurations if the project is running from inside a Docker container. If not, use defaults
 const JANUS_NODE = {
