@@ -181,7 +181,6 @@ async function newSubscription(jobId, oracleAddress) {
 	console.info(`Subscribing to Oracle at ${oracleAddress} for requests to job ID ${jobId}...`);
 	let fromBlock = await rpc.getBlockNumber();
 	let index = 0;
-	console.log(fromBlock)
 	// Topics include OracleRequest event signature and hex job Id to wait for logs for the given job
 	const waitForLogsRequest = (from) => qtumConnection.rawCall('waitforlogs', [from, null, { "addresses": [oracleAddress.split('0x')[1]], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.toHex(jobId).split('0x')[1]] }, 1]).then((event) => {
 		// Temporary workaround for one log per block
