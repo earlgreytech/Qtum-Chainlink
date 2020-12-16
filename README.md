@@ -26,6 +26,8 @@ to work with the SideToken.
 - `Link`, is the contract that will be deployed on the QTUM network, mirroring the LinkToken contract deployed on Ethereum network (deployed via Remix as it has a different solc version than majority of contracts).
 - `Consumer`, is the contract that will request the data to the Oracle. On test run, it will request last traded price of QTUM/BTC pair from Liquid.com exchange.
 
+Note: solc version I used is: `0.5.17+commit.d19bba13.Darwin.appleclang`
+
 ## Install
 
 [Install Docker](https://docs.docker.com/get-docker/)
