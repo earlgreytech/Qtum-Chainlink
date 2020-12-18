@@ -19,7 +19,7 @@ const oracleRequestAbi = [{ "indexed": true, "name": "specId", "type": "bytes32"
 
 const app = express();
 const port = process.env.INITIATOR_PORT || 30055;
-const confirmations = 6;
+const confirmations = 1;
 
 
 let web3 = new Web3()

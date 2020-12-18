@@ -21,8 +21,7 @@ back to the contract that originally created the event log, just like the native
 
 ## Contracts:
 
-- `Oracle`, the Oracle contract is the 0.5 version, with a single modification on the onTokenTransfer function of the LinkTokenReceiver to be able
-to work with the SideToken.
+- `Oracle`, the Oracle contract is the 0.5 version
 - `Link`, is the contract that will be deployed on the QTUM network, mirroring the LinkToken contract deployed on Ethereum network (deployed via Remix as it has a different solc version than majority of contracts).
 - `Consumer`, is the contract that will request the data to the Oracle. On test run, it will request last traded price of QTUM/BTC pair from Liquid.com exchange.
 
