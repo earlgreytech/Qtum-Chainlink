@@ -81,21 +81,21 @@ If you running this on a private QTUM network/regtest mode, you are going to nee
 
 ## Oracle Contract
 
-To deploy the Oracle Contract, run the following command replacing LINKTOKEN_ADDRESS with the LinkToken Address from the previously deployed LinkToken smart contract.
+To deploy the Oracle Contract, run the following command replacing LINKTOKEN_ADDRESS with the LinkToken Address from the previously deployed LinkToken smart contract. Replace HEX_QTUM_ADDRESS with the hexadecimal formatted version of your QTUM address.
 
 `cd testnet-deploy`
 
-`solar deploy contracts/Oracle.sol '[LINKTOKEN_ADDRESS]' --eth_rpc=http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889 --gasPrice=0.0000001 --force`
+`solar deploy contracts/Oracle.sol '[LINKTOKEN_ADDRESS]' --eth_rpc=http://HEX_QTUM_ADDRESS:@localhost:23889 --gasPrice=0.0000001 --force`
 
 Take note of the oracle contract address returned by Solar for use later.
 
 Note: If an error is returned noting that localhost as the host name is incorrect, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
 
-Next, you will need to set the ETH_RPC environment variable and allow the adapter to fulfill oracle requests by running the following command.
+Next, you will need to set the ETH_RPC environment variable and allow the adapter to fulfill oracle requests by running the following command. Once again, replace HEX_QTUM_ADDRESS with the hexadecimal formatted version of your QTUM address in both the export call and `setFulfillmentPermission` call.
 
-`export ETH_RPC=http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889`
+`export ETH_RPC=http://HEX_QTUM_ADDRESS:@localhost:23889`
 
-`node scripts/oracle-fulfill.js setFulfillmentPermission 0x7926223070547D2D15b2eF5e7383E541c338FfE9 true`
+`node scripts/oracle-fulfill.js setFulfillmentPermission HEX_QTUM_ADDRESS true`
 
 ## Job Creation via Chainlink Web UI
 

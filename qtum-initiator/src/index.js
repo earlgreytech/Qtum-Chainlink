@@ -9,7 +9,7 @@ const Web3 = require('web3');
 const db = require('./db.js');
 require('console-stamp')(console);
 const qtum = require("qtumjs-eth")
-const rpcURL = process.env.JANUS_URL || 'http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.15:23889';
+const rpcURL = `http://${process.env.HEX_QTUM_ADDRESS}:@${process.env.JANUS_HOST}:23889`;
 const qtumAccount = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 const { QtumRPC } = require('qtumjs')
@@ -29,13 +29,14 @@ let Subscriptions = [];
 // Setup different configurations if the project is running from inside a Docker container. If not, use defaults
 const JANUS_NODE = {
 	protocol: 'http',
-	host: process.env.JANUS_HOST || '0x7926223070547d2d15b2ef5e7383e541c338ffe9:@10.1.60.15',
+	hexqtumaddress: process.env.HEX_QTUM_ADDRESS,
+	host: process.env.JANUS_HOST || 'localhost',
 	port: process.env.JANUS_PORT || 23889,
 };
 const JANUS_CONFIG = {
 	'name': 'JANUS',
 	'shortname': 'ETH JSON-RPC ADAPTER',
-	'url': `http://${JANUS_NODE.host}:${JANUS_NODE.port}`
+	'url': `http://${JANUS_NODE.hexqtumaddress}:@${JANUS_NODE.host}:${JANUS_NODE.port}`
 };
 
 // Initialize the Chainlink API Client without credentials, the initiator will login using the access key and secret
