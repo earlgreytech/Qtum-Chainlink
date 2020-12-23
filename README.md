@@ -27,6 +27,37 @@ back to the contract that originally created the event log, just like the native
 
 Note: solc version I used is: `0.5.17+commit.d19bba13.Darwin.appleclang`
 
+## .env Configuration
+
+Before spinning up the docker containers, make sure to properly configure your `.env` files in the `qtum-initiator` and `qtumtx-adapter` folders. You will most certainly need to provide your QTUM address in hexadecimal formatting for `HEX_QTUM_ADDRESS` and you may run into issues when working with your docker containers locally, in which you will find it helpful to change the `JANUS_HOST` from `localhost` to your private ip address by running  `ifconfig` and finding your inet address which should be identifiable in the `en0:` object.
+
+#### QTUM Initiator 
+
+ Key | Description | Example |
+|-----|-------------|---------|
+| `INITIATOR_HOST` | The hostname of the QTUM Initiator | `qtum-initiator` |
+| `INITIATOR_NAME` | The Initiator name that will be registered on Chainlink Core | `qtuminitiator` |
+| `INITIATOR_PORT` | The port where the Initiator service will be listening | `30055` |
+| `CHAINLINK_BASE_URL` | The URL of the Chainlink Core service with a trailing slash | `http://chainlink-node:6688/` |
+| `DATABASE_URL` | The URL of the Postgres connection | `postgresql://postgres:chainlink@postgres-server:5432/qtumtx_adapter?sslmode=disable&client_encoding=utf8&connect_timeout=5000` |
+| `HEX_QTUM_ADDRESS` | The hexadecimal formatted version of your QTUM Address | `0x7926223070547d2d15b2ef5e7383e541c338ffe9` |
+| `JANUS_HOST` | The hostname of the JANUS RPC-API Adapter | `localhost` |
+| `JANUS_PORT` | The port of the JANUS RPC-API Adapter | `23889` |
+
+#### QTUMTX Adapter
+
+ Key | Description | Example |
+|-----|-------------|---------|
+| `ADAPTER_HOST` | The hostname of the QTUM Initiator | `qtumtx-adapter` |
+| `ADAPTER_NAME` | The Initiator name that will be registered on Chainlink Core | `qtumtxadapter` |
+| `ADAPTER_PORT` | The port where the Initiator service will be listening | `30056` |
+| `CHAINLINK_BASE_URL` | The URL of the Chainlink Core service with a trailing slash | `http://chainlink-node:6688/` |
+| `DATABASE_URL` | The URL of the Postgres connection | `postgresql://postgres:chainlink@postgres-server:5432/qtumtx_adapter?sslmode=disable&client_encoding=utf8&connect_timeout=5000` |
+| `HEX_QTUM_ADDRESS` | The hexadecimal formatted version of your QTUM Address | `0x7926223070547d2d15b2ef5e7383e541c338ffe9` |
+| `JANUS_HOST` | The hostname of the JANUS RPC-API Adapter | `localhost` |
+| `JANUS_PORT` | The port of the JANUS RPC-API Adapter | `23889` |
+
+
 ## Install
 
 [Install Docker](https://docs.docker.com/get-docker/)
