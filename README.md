@@ -29,7 +29,7 @@ Note: solc version I used is: `0.5.17+commit.d19bba13.Darwin.appleclang`
 
 ## .env Configuration
 
-Before spinning up the docker containers, make sure to properly configure your `.env` files in the `qtum-initiator` and `qtumtx-adapter` folders. You will most certainly need to provide your QTUM address in hexadecimal formatting for `HEX_QTUM_ADDRESS` and you may run into issues when working with your docker containers locally, in which you will find it helpful to change the `JANUS_HOST` from `localhost` to your private ip address by running  `ifconfig` and finding your inet address which should be identifiable in the `en0:` object.
+Before spinning up the docker containers, make sure to properly configure your `.env` files in the `qtum-initiator` and `qtumtx-adapter` folders. You will most certainly need to provide your QTUM address in hexadecimal formatting for `HEX_QTUM_ADDRESS` and you may run into issues when working with your docker containers locally, if the `qtum-initiator` or `qtumtx-adapter` return an error along the lines of localhost as the host name is incorrect or `Error: connect ECONNREFUSED 127.0.0.1:23889`, you will find it helpful to change the `JANUS_HOST` from `localhost` to your private ip address by running `ifconfig` and finding your inet address which should be identifiable in the `en0:` object.
 
 #### QTUM Initiator 
 
@@ -68,15 +68,6 @@ Install qtum here: https://github.com/qtumproject/qtum/releases
 
 After installing and running, you will want to export the `/bin` folder to your PATH.
 
-## Fill QTUM Accounts for Gas
-
-`cd docker/standalone`
-
-`chmod 755 fill_user_account.sh`
-
-`./fill_user_account.sh`
-
-`await` an array of hashes to return to the console. ;)
 ## Build qtumjs-eth
 
 The qtumjs-eth package requires running an internal build command, so before proceeding to the next step, follow the following instructions to avoid module not found issues.
@@ -102,6 +93,16 @@ To stop the containers and delete the volumes, so that the configuration and cha
 docker-compose down -v
 ```
 
+## Fill QTUM Accounts for Gas
+
+`cd docker/standalone`
+
+`chmod 755 fill_user_account.sh`
+
+`./fill_user_account.sh`
+
+`await` an array of hashes to return to the console. ;)
+
 ## Install Solar Smart Contract Deployment Tool
 
 After following the instructions for setting up Solar at https://github.com/qtumproject/solar, you will likely need to add solar to your path for access in other directories.
@@ -120,7 +121,7 @@ To deploy the Oracle Contract, run the following command replacing LINKTOKEN_ADD
 
 Take note of the oracle contract address returned by Solar for use later.
 
-Note: If an error is returned noting that localhost as the host name is incorrect, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
+Note: If an error is returned noting that localhost as the host name is incorrect or `Error: connect ECONNREFUSED 127.0.0.1:23889`, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
 
 Next, you will need to set the ETH_RPC environment variable and allow the adapter to fulfill oracle requests by running the following command. Once again, replace HEX_QTUM_ADDRESS with the hexadecimal formatted version of your QTUM address in both the export call and `setFulfillmentPermission` call.
 
@@ -177,7 +178,7 @@ The consumer contract will allow you to `requestQTUMPrice` and return the `price
 
 `solar deploy contracts/Consumer.sol '[LINKTOKEN_ADDRESS, ORACLE_CONTRACT_ADDRESS, BYTES32_JOB_ID]' --eth_rpc=http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889 --gasPrice=0.0000001 --force`
 
-Note: If an error is returned noting that localhost as the host name is incorrect, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
+Note: If an error is returned noting that localhost as the host name is incorrect or `Error: connect ECONNREFUSED 127.0.0.1:23889`, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
 
 Next, you will run `node scripts/consumer-request.js requestQTUMPrice` which will broadcast a Chainlink Request, the external initiator will pick up on a new subscription from the Chainlink Node, encode the data and initiate a job run, triggering a POST request to the /adapter endpoint which will fulfill the Oracle Request and post the data on-chain via the qtumtxadapter.
 
