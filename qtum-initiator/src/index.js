@@ -9,7 +9,7 @@ const Web3 = require('web3');
 const db = require('./db.js');
 require('console-stamp')(console);
 const qtum = require("qtumjs-eth")
-const rpcURL = `http://${process.env.HEX_QTUM_ADDRESS}:@${process.env.JANUS_HOST}:23889`;
+const rpcURL = `http://${process.env.HEX_QTUM_ADDRESS}:@${process.env.JANUS_HOST}:${process.env.JANUS_PORT}`;
 const qtumAccount = url.parse(rpcURL).auth.split(":")[0]
 const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 const { QtumRPC } = require('qtumjs')

@@ -5,7 +5,6 @@
 	"scripts": {
 		"test": "npx truffle test",
 		"postinstall": "cd node_modules/qtumjs-eth/ && yarn && yarn build ; cd ../../ "
-
 	},
 	"dependencies": {
 		"minimist": "^1.2.5",
