@@ -98,6 +98,32 @@ services:
       - adapter-modules:/home/qtumtx-adapter/node_modules
       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
       - shared-volume:/home/qtumtx-adapter/config
+  automated-deployment:
+    container_name: automated-deployment
+    build:
+      context: .
+      dockerfile: ./automated-deployment/Dockerfile
+    env_file:
+      - ./automated-deployment/.env
+    depends_on:
+      - qtum
+      - janus
+      - qtum-initiator
+      - qtumtx-adapter
+    links:
+      - "qtum"
+      - "janus"
+      - "qtum-initiator"
+      - "qtumtx-adapter"
+    secrets:
+      - chainlink_api
+    volumes:
+       - ./automated-deployment/src:/home/automated-deployment/src
+       - ./chainlink-api-client/src:/home/chainlink-api-client/src
+       - runner-modules:/home/automated-deployment/node_modules
+       - contracts-build-directory:/home/automated-deployment/artifacts:z
+       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
+       - shared-volume:/home/automated-deployment/config:z
 secrets:
   # Janus derives a copy of private keys from your public key in it's current state, thus the adapterKey is futile.
   # adapter_key:

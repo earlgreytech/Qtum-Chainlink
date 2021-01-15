@@ -1,0 +1,29 @@
+{
+	"name": "test-runner",
+	"version": "0.0.5",
+	"description": "Test runner for the Chainlink-QTUM integration that deploys the contracts, configures the Chainlink node and requests data to a Consumer contract",
+	"scripts": {
+		"dev": "npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
+		"setup:qtum": "npm run fund:qtum && npm run deploy:migrations:qtum && npm run deploy:oracle:qtum && npm run deploy:client:qtum",
+		"start": "node index.js",
+		"test": "npx truffle test",
+		"deploy:linktoken:qtum": "npx truffle migrate --f 1 --to 2 --network qtum",
+		"deploy:oracle:qtum": "npx truffle migrate --f 3 --to 3 --network qtum",
+		"deploy:consumer:qtum": "npx truffle migrate --f 4 --to 4 --network qtum"
+	},
+	"dependencies": {
+		"docker": "1.1.0",
+		"@truffle/contract": "^4.2.3",
+		"@truffle/hdwallet-provider": "^1.0.34",
+		"cbor": "^5.0.2",
+		"chainlink-api-client": "file:../../chainlink-api-client",
+		"truffle": "^5.1.23",
+        "web3": "^1.2.7",
+        "dotenv": "8.2.0"
+	},
+	"devDependencies": {
+		"@openzeppelin/test-helpers": "github:OpenZeppelin/openzeppelin-test-helpers",
+		"@truffle/debug-utils": "^4.1.1",
+		"nodemon": "^2.0.3"
+	}
+}
