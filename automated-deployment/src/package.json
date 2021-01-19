@@ -1,7 +1,7 @@
 {
-	"name": "test-runner",
+	"name": "automated-deployment",
 	"version": "0.0.5",
-	"description": "Test runner for the Chainlink-QTUM integration that deploys the contracts, configures the Chainlink node and requests data to a Consumer contract",
+	"description": "Automated deployment for the Chainlink-QTUM integration that deploys the contracts, configures the Chainlink node and requests data to a Consumer contract",
 	"scripts": {
 		"dev": "npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
 		"setup:qtum": "npm run fund:qtum && npm run deploy:migrations:qtum && npm run deploy:oracle:qtum && npm run deploy:client:qtum",
