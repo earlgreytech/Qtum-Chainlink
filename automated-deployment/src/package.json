@@ -12,7 +12,6 @@
 		"deploy:consumer:qtum": "npx truffle migrate --f 4 --to 4 --network qtum"
 	},
 	"dependencies": {
-		"docker": "1.1.0",
 		"@truffle/contract": "^4.2.3",
 		"@truffle/hdwallet-provider": "^1.0.34",
 		"cbor": "^5.0.2",
