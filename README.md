@@ -18,6 +18,11 @@ This boilerplate has 6 services, each running in its own Docker container
 run created by the QTUM Initiator is automatically given the parameters needed for the QTUM TX adapter task to report the run
 back to the contract that originally created the event log, just like the native Runlog initiator.
 - `qtumtx-adapter`, an external adapter connected to the QTUM node that takes the input given and places it into the data field of a transaction, just like the native EthTx adapter. It then signs the transaction and sends it to an address on QTUM network.
+- `automated-deployment`, a node script that initializes the testing environment, first deploying the LinkToken contract and
+   an Oracle contract. Then configures the Chainlink node, creating a job that uses the QTUM Initiator and QTUM TX adapter.
+   Once the Chainlink node is ready, it deploys a Consumer contract configured with the previously deployed LinkToken and
+   Oracle contracts, and the previously created job. Then mints tokens and send some to the Consumer contract. Finally it
+   calls the requestQTUMPrice of the Consumer contract and then polls for current price. */
 
 ## Contracts:
 
@@ -68,6 +73,11 @@ Install qtum here: https://github.com/qtumproject/qtum/releases
 
 After installing and running, you will want to export the `/bin` folder to your PATH.
 
+
+## Automated Deployment Script
+
+If you are planning on running the automated-deployment docker service, at this point you can just run `./spin_up.sh` in the root directory, else follow the instructions below for manual testing.
+
 ## Build qtumjs-eth
 
 The qtumjs-eth package requires running an internal build command, so before proceeding to the next step, follow the following instructions to avoid module not found issues.
@@ -79,6 +89,8 @@ The qtumjs-eth package requires running an internal build command, so before pro
 `cd testnetdeploy && yarn`
 
 ## Run Local Development Setup
+
+<bold>IMPORTANT:</bold> If you do not intend to run the `spin_up.sh` shell script, at this point, you should go into the `docker-compose.yaml` file and comment out lines 97-122.
 
 To start the services, simply run:
 

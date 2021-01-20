@@ -4,11 +4,10 @@
 	"description": "External initiator for Chainlink that triggers a Job Run based on log events from an Oracle deployed in QTUM network.",
 	"scripts": {
 		"start": "node index.js",
-		"dev": "npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
+		"dev": "yarn && cd node_modules/qtumjs-eth/ && yarn && yarn build ; cd ../../  &&  npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
 		"setup": "node setup.js",
 		"remove": "node remove.js",
-		"delsubs": "node delsubs.js",
-		"postinstall": "cd node_modules/qtumjs-eth/ && yarn && yarn build ; cd ../../ "
+		"delsubs": "node delsubs.js"
 	},
 	"dependencies": {
 		"body-parser": "^1.19.0",

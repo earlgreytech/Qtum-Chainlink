@@ -3,11 +3,10 @@
 	"version": "0.1.0",
 	"description": "External adapter for Chainlink that takes the input sent by Chainlink, and sends a transaction with that data to an address on a QTUM network.",
 	"scripts": {
-		"start": "node index.js",
-		"dev": "npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
+		"start": "cd ./node_modules/qtumjs-eth/ && yarn && yarn build ; cd ../../  && node index.js",
+		"dev": "yarn && cd node_modules/qtumjs-eth/ && yarn && yarn build; cd ../../ && npx nodemon --watch index.js --watch ../../chainlink-api-client/src/index.js index.js",
 		"setup": "node setup.js",
-		"remove": "node remove.js",
-		"postinstall": "cd node_modules/qtumjs-eth/ && yarn && yarn build ; cd ../../ "
+		"remove": "node remove.js"
 	},
 	"dependencies": {
 		"chainlink-api-client": "file:../../chainlink-api-client",
