@@ -119,8 +119,11 @@ async function initTestRunner(){
 		// Deploy Consumer or instantiate previously deployed contract
 		const Consumer = await setupContract('Consumer', JANUS_CONFIG, chainId, web3.currentProvider);
 		console.log(`[INFO] - Deployed Consumer contract address in ${JANUS_CONFIG.name} network is: ${Consumer.address}`);
-
-		Consumer.requestQTUMPrice(0, {from: process.env.HEX_QTUM_ADDRESS, gas: "0x2625a00", gasPrice: "0x64"})
+		
+		//const gasEstimate = await Consumer.requestQTUMPrice.estimateGas({from: process.env.HEX_QTUM_ADDRESS})
+		//console.log("estimated gas: ", gasEstimate)
+	
+		Consumer.requestQTUMPrice({from: process.env.HEX_QTUM_ADDRESS, gas: "0x4c4b40", gasPrice: "0x64"})
 		.then(function(result){
 			// Watch for the RequestFulfilled event of the Consumer contract
 			Consumer.RequestFulfilled({

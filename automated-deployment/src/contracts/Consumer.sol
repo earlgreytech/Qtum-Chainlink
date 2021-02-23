@@ -18,7 +18,7 @@ contract Consumer is ChainlinkClient {
     req.add("get", "https://api.liquid.com/products/133");
     req.add("path", "last_traded_price");
     req.addInt("times", 100000000);
-    sendChainlinkRequest(req, 0);
+    sendChainlinkRequest(req, 1);
   }
 
 
