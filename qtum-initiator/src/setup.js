@@ -1,4 +1,5 @@
 const ChainlinkAPIClient = require('chainlink-api-client');
+const path = require('path');
 const fs = require('fs');
 const db = require('./db.js');
 const Web3 = require('web3');
@@ -53,6 +54,7 @@ async function initDb(){
 async function install(){
 	return new Promise (async function(resolve, reject){
 		await chainlink.login();
+		consolge.log("INITIATOR_NAME: ".process.env.INITIATOR_NAME)
 		const newInit = await chainlink.createInitiator(process.env.INITIATOR_NAME, INITIATOR_URL);
 		if (!newInit.errors){
 			try {
@@ -76,9 +78,11 @@ async function install(){
 				console.info('Auth config successfully saved');
 				resolve(true);
 			}catch(e){
+				console.log("FAILURE - failed at initiator creation")
 				console.error(e);
 			}
 		}else{
+			console.log("FAILURE - failed at newInit creation")
 			console.error(JSON.stringify(newInit.errors));
 		}
 		await chainlink.logout();		
@@ -88,6 +92,7 @@ async function install(){
 async function runSetup(){
 	try {
 		const result = await db.query('SELECT * FROM auth_data');
+		console.info(`Query result (setup.js): ${result}`)
 		if (result.fields.length == 2){
 			console.info('Found old auth schema, updating...');
 			const sqlUpdate = `
@@ -102,6 +107,8 @@ async function runSetup(){
 			if (result.rows.length > 0){
 				console.info('Authentication data found');
 			}else{
+				console.info(`Chainlink email: ${chainlinkEmail}`)
+				console.info(`Chainlink Pwd: ${chainlinkPass}`)
 				console.info('Database exists but authentication data is not found, running install...');
 				await install();
 			}

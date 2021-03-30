@@ -1,4 +1,5 @@
 const ChainlinkAPIClient = require('chainlink-api-client');
+const path = require('path');
 const fs = require('fs');
 const db = require('./db.js');
 const Web3 = require('web3');

@@ -237,8 +237,10 @@ async function setupCredentials() {
 		try {
 			if (process.env.DATABASE_URL) {
 				const proc = exec('npm run setup', async (error, stdout, stderr) => {
+					
 					if (!error) {
 						const result = await db.query('SELECT * FROM auth_data');
+						console.info(`Query result (index.js): ${result}`)
 						if (result.rows.length > 0) {
 							resolve();
 						} else {

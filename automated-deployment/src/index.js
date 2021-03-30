@@ -2,6 +2,7 @@ const { exec } = require('child_process');
 const ChainlinkAPIClient = require('chainlink-api-client');
 const contract = require('@truffle/contract');
 const external = require('./external.js');
+const path = require('path');
 const fs = require('fs');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const Web3 = require('web3');
@@ -100,9 +101,12 @@ async function initTestRunner(){
 		// Connect web3 with QTUM network
 		const web3 = await setupNetwork(JANUS_CONFIG);
 
+
+		console.log(`[INFO] - Chainlink Email: ${chainlinkEmail}`)
+		console.log(`[INFO] - Chainlink PWD: ${chainlinkPass}`)
 		// const fundTestAccountResult = await fundTestAccount();
 
-		const chainId = 'JANUS'
+		const chainId = '81'
 		console.log(`[INFO] - Web3 is connected to the ${JANUS_CONFIG.name} node. Chain ID: ${chainId}`);
 		
 		// Deploy LinkToken or instantiate previously deployed contract
@@ -154,7 +158,7 @@ async function initTestRunner(){
 function isContractCompiled(contractName){
 	return new Promise(async function(resolve, reject){
 		const path = `${CONTRACTS_BUILD_DIRECTORY}/${contractName}.json`;
-		fs.exists(path, function(exists){
+		fs.existsSync(path, function(exists){
 			resolve(exists);
 		});
 	});
