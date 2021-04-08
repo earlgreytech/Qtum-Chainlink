@@ -18,7 +18,7 @@ This boilerplate has 6 services, each running in its own Docker container
 run created by the QTUM Initiator is automatically given the parameters needed for the QTUM TX adapter task to report the run
 back to the contract that originally created the event log, just like the native Runlog initiator.
 - `qtumtx-adapter`, an external adapter connected to the QTUM node that takes the input given and places it into the data field of a transaction, just like the native EthTx adapter. It then signs the transaction and sends it to an address on QTUM network.
-- `automated-deployment`, a node script that initializes the testing environment, first deploying the LinkToken contract and
+- `automated-deployment (TESTING)`, a node script that initializes the testing environment, first deploying the LinkToken contract and
    an Oracle contract. Then configures the Chainlink node, creating a job that uses the QTUM Initiator and QTUM TX adapter.
    Once the Chainlink node is ready, it deploys a Consumer contract configured with the previously deployed LinkToken and
    Oracle contracts, and the previously created job. Then mints tokens and send some to the Consumer contract. Finally it
@@ -34,7 +34,7 @@ Note: solc version I used is: `0.5.17+commit.d19bba13.Darwin.appleclang`
 
 ## .env Configuration
 
-Before spinning up the docker containers, make sure to properly configure your `.env` files in the `qtum-initiator` and `qtumtx-adapter` folders. You will most certainly need to provide your QTUM address in hexadecimal formatting for `HEX_QTUM_ADDRESS` and you may run into issues when working with your docker containers locally, if the `qtum-initiator` or `qtumtx-adapter` return an error along the lines of localhost as the host name is incorrect or `Error: connect ECONNREFUSED 127.0.0.1:23889`, you will find it helpful to change the `JANUS_HOST` from `localhost` to your private ip address by running `ifconfig` and finding your inet address which should be identifiable in the `en0:` object.
+Before spinning up the docker containers, make sure to properly configure your `.env` files in the `qtum-initiator` and `qtumtx-adapter` folders. You will most certainly need to provide your QTUM address in hexadecimal formatting for `HEX_QTUM_ADDRESS`
 
 #### QTUM Initiator 
 
@@ -46,7 +46,7 @@ Before spinning up the docker containers, make sure to properly configure your `
 | `CHAINLINK_BASE_URL` | The URL of the Chainlink Core service with a trailing slash | `http://chainlink-node:6688/` |
 | `DATABASE_URL` | The URL of the Postgres connection | `postgresql://postgres:chainlink@postgres-server:5432/qtumtx_adapter?sslmode=disable&client_encoding=utf8&connect_timeout=5000` |
 | `HEX_QTUM_ADDRESS` | The hexadecimal formatted version of your QTUM Address | `0x7926223070547d2d15b2ef5e7383e541c338ffe9` |
-| `JANUS_HOST` | The hostname of the JANUS RPC-API Adapter | `localhost` |
+| `JANUS_HOST` | The hostname of the JANUS RPC-API Adapter | `janus` |
 | `JANUS_PORT` | The port of the JANUS RPC-API Adapter | `23889` |
 
 #### QTUMTX Adapter
@@ -59,7 +59,7 @@ Before spinning up the docker containers, make sure to properly configure your `
 | `CHAINLINK_BASE_URL` | The URL of the Chainlink Core service with a trailing slash | `http://chainlink-node:6688/` |
 | `DATABASE_URL` | The URL of the Postgres connection | `postgresql://postgres:chainlink@postgres-server:5432/qtumtx_adapter?sslmode=disable&client_encoding=utf8&connect_timeout=5000` |
 | `HEX_QTUM_ADDRESS` | The hexadecimal formatted version of your QTUM Address | `0x7926223070547d2d15b2ef5e7383e541c338ffe9` |
-| `JANUS_HOST` | The hostname of the JANUS RPC-API Adapter | `localhost` |
+| `JANUS_HOST` | The hostname of the JANUS RPC-API Adapter | `janus` |
 | `JANUS_PORT` | The port of the JANUS RPC-API Adapter | `23889` |
 
 
@@ -67,16 +67,15 @@ Before spinning up the docker containers, make sure to properly configure your `
 
 [Install Docker](https://docs.docker.com/get-docker/)
 
-## Install QTUM Core
+## Setting things up with Docker
 
-Install qtum here: https://github.com/qtumproject/qtum/releases
+Run `./spin_up.sh` in the root directory in order to spin up the necessary containers as well fund the accounts with QTUM.
 
-After installing and running, you will want to export the `/bin` folder to your PATH.
+Alternatively, if there's an error with the script due to fas execution, you can run the following commands in the root directory in order:
 
-
-## Automated Deployment Script
-
-If you are planning on running the automated-deployment docker service, at this point you can just run `./spin_up.sh` in the root directory, else follow the instructions below for manual testing.
+- `docker-compose -f  docker-compose.yaml up --always-recreate-deps -d`  
+- `docker cp ./docker/standalone/fill_user_account.sh qtum:.`
+- `docker exec qtum /bin/sh -c ./fill_user_account.sh`
 
 ## Build qtumjs-eth
 
@@ -113,37 +112,23 @@ docker-compose down -v
 
 `./fill_user_account.sh`
 
-`await` an array of hashes to return to the console. ;)
-
-## Install Solar Smart Contract Deployment Tool
-
-After following the instructions for setting up Solar at https://github.com/qtumproject/solar, you will likely need to add solar to your path for access in other directories.
+`await` an array of hashes to return to the console.
 
 ## LinkToken
 
-If you running this on a private QTUM network/regtest mode, you are going to need to deploy the LinkToken contract for further interaction with the services. You can deploy via Remix (point endpoint to http://localhost:23889) or Solar, but Remix may be a better choice to deploy as the majority of the other contracts we will be interacting with are not compatible with the LinkToken solidity version.
+Enter `automated-deployment/src` and run `truffle migrate --f 1 --to 2 --network qtum` to deploy the LinkToken into the local testnet. It is important that you keep the address of this contract for the next steps.
 
 ## Oracle Contract
 
-To deploy the Oracle Contract, run the following command replacing LINKTOKEN_ADDRESS with the LinkToken Address from the previously deployed LinkToken smart contract. Replace HEX_QTUM_ADDRESS with the hexadecimal formatted version of your QTUM address.
+Inside of `testnet-deploy/migrations/2_deploy_oracle.js`, change the values for `LINKTOKEN_ADDRESS` to the address of your LinkToken previously deployed, and `ADAPTER_ADDRESS` to the address used to fulfill requests, `0x7926223070547d2d15b2ef5e7383e541c338ffe9` is used in the env files, so that would be our value unless a different address is used to fulfill the requests. 
 
-`cd testnet-deploy`
+Use `truffle migrate --f 2 --to 2 --network qtum` to deploy the oracle to the local testnet.
 
-`solar deploy contracts/Oracle.sol '[LINKTOKEN_ADDRESS]' --eth_rpc=http://HEX_QTUM_ADDRESS:@localhost:23889 --gasPrice=0.0000001 --force`
-
-Take note of the oracle contract address returned by Solar for use later.
-
-Note: If an error is returned noting that localhost as the host name is incorrect or `Error: connect ECONNREFUSED 127.0.0.1:23889`, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
-
-Next, you will need to set the ETH_RPC environment variable and allow the adapter to fulfill oracle requests by running the following command. Once again, replace HEX_QTUM_ADDRESS with the hexadecimal formatted version of your QTUM address in both the export call and `setFulfillmentPermission` call.
-
-`export ETH_RPC=http://HEX_QTUM_ADDRESS:@localhost:23889`
-
-`node scripts/oracle-fulfill.js setFulfillmentPermission HEX_QTUM_ADDRESS true`
+Take note of the oracle contract address.
 
 ## Job Creation via Chainlink Web UI
 
-After deploying the LinkToken and Oracle Contract and before proceeding to the creation of the consumer contract, you will want to create a Job for your Chainlink Node.
+After deploying the LinkToken and Oracle Contract and before proceeding to the creation of the consumer contract, you will want to create a Job for your Chainlink Node located at `http://localhost:6688`
 
 Use the following template to create the job, replacing ORACLE_CONTRACT_ADDRESS with the Oracle Contract address returned from solar.
 
@@ -184,17 +169,13 @@ Take note of the Job Id use https://web3-type-converter.onbrn.com/ or a differen
 
 ## Consumer Contract
 
-The consumer contract will allow you to `requestQTUMPrice` and return the `price`, run the following command replacing LINKTOKEN_ADDRESS, ORACLE_CONTRACT_ADDRESS, and BYTES32_JOB_ID with the previous collected values.
+Next, in `testnet-deploy/migrations/3_deploy_consumer.js`, put in the values for `LINKTOKEN_ADDRESS`, `"ORACLE_ADDRESS"` from the previous migrations, and `"YOUR_JOB_ID_IN_HEX"` from the values of the job id converted to bytes32.
 
-`cd testnet-deploy`
+## Making a request
 
-`solar deploy contracts/Consumer.sol '[LINKTOKEN_ADDRESS, ORACLE_CONTRACT_ADDRESS, BYTES32_JOB_ID]' --eth_rpc=http://0x7926223070547d2d15b2ef5e7383e541c338ffe9:@localhost:23889 --gasPrice=0.0000001 --force`
+To test out making a request, go inside of `testnet_deploy` and run `truffle exec ./scripts/request.js`, to trigger a jub run.
 
-Note: If an error is returned noting that localhost as the host name is incorrect or `Error: connect ECONNREFUSED 127.0.0.1:23889`, you will need to run `ifconfig` and find you inet address which should be identifiable in the `en0:` object.
+After running the script, a job will be triggered and can be seen insode of the chainlink web ui at `http://localhost:6688`, and a price can be received after the first run since the value get's stored inside of the contract `Consumer.sol` as `currentPrice`.
 
-Next, you will run `node scripts/consumer-request.js requestQTUMPrice` which will broadcast a Chainlink Request, the external initiator will pick up on a new subscription from the Chainlink Node, encode the data and initiate a job run, triggering a POST request to the /adapter endpoint which will fulfill the Oracle Request and post the data on-chain via the qtumtxadapter.
 
-We should now be able to query the `price` by running the following command...
-
-`node scripts/consumer-request.js requestCurrentPrice`
 
