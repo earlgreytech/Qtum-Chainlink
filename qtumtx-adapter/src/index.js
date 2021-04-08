@@ -152,7 +152,7 @@ async function fulfillRequest(req) {
 		}])
 		if (signed) {
 			rpc.rawCall('eth_sendRawTransaction', [signed]).then((txid) => {
-				rpc.rawCall('eth_getTransactionReceipt', [txid]).then((receipt) => {
+				rpc.rawCall('eth_getTransactionReceipt', [txid[0]]).then((receipt) => {
 					console.info('Fulfill Request TX has been mined: ' + receipt.transactionHash);
 					if ((typeof receipt.status !== 'undefined') && (typeof receipt.logs !== 'undefined')) {
 						console.info(`Transaction ${receipt.transactionHash} is in TX Pool`);

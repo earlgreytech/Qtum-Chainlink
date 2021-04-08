@@ -18,17 +18,17 @@ services:
     environment: 
         - QTUM_RPC=http://qtum:testpasswd@qtum:3889
     volumes:
-        - ./docker/standalone/myaccounts.txt:/go/myaccounts.txt
+        - ./docker/standalone/myaccounts.txt:$GOPATH/github.com/qtumproject/janus/myaccounts.txt
     depends_on:
       - qtum
-    command: --bind 0.0.0.0 --accounts myaccounts.txt --dev
+    command: --bind 0.0.0.0 --accounts $GOPATH/github.com/qtumproject/janus/myaccounts.txt --dev
   qtum:
     container_name: qtum
     ports:
       - "3889:3889"
       - "3890:3890"
     image: qtum/qtum:latest
-    command: qtumd -regtest  -rpcbind=0.0.0.0:3889 -rpcallowip=0.0.0.0/0 -logevents -rpcuser=qtum -rpcpassword=testpasswd -deprecatedrpc=accounts -printtoconsole
+    command: qtumd -regtest -addrindex=1 -reindex -rpcbind=0.0.0.0:3889 -rpcallowip=0.0.0.0/0 -logevents -rpcuser=qtum -rpcpassword=testpasswd -deprecatedrpc=accounts -printtoconsole
   postgres-server:
     container_name: postgres-server
     build: ./docker/postgres-server
@@ -94,32 +94,6 @@ services:
       - adapter-modules:/home/qtumtx-adapter/node_modules
       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
       - shared-volume:/home/qtumtx-adapter/config
-  automated-deployment:
-    container_name: automated-deployment
-    build:
-      context: .
-      dockerfile: ./automated-deployment/Dockerfile
-    env_file:
-      - ./automated-deployment/.env
-    depends_on:
-      - qtum
-      - janus
-      - qtum-initiator
-      - qtumtx-adapter
-    links:
-      - "qtum"
-      - "janus"
-      - "qtum-initiator"
-      - "qtumtx-adapter"
-    secrets:
-      - chainlink_api
-    volumes:
-       - ./automated-deployment/src:/home/automated-deployment/src
-       - ./chainlink-api-client/src:/home/chainlink-api-client/src
-       - runner-modules:/home/automated-deployment/node_modules
-       - contracts-build-directory:/home/automated-deployment/artifacts:z
-       - chainlink-api-client-modules:/home/chainlink-api-client/node_modules
-       - shared-volume:/home/automated-deployment/config:z
 secrets:
   # Janus derives a copy of private keys from your public key in it's current state, thus the adapterKey is futile.
   # adapter_key:
