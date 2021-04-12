@@ -175,7 +175,7 @@ Then proceed to deploy the consumer contrat by running `truffle migrate --f 3 --
 
 ## Making a request
 
-To test out making a request, go inside of `testnet_deploy` and run `truffle exec ./scripts/request.js`, to trigger a jub run.
+To test out making a request, go inside of `testnet_deploy` and run `truffle exec ./scripts/request.js --network qtum`, to trigger a jub run.
 
 After running the script, a job will be triggered and can be seen insode of the chainlink web ui at `http://localhost:6688`, and a price can be received after the first run since the value get's stored inside of the contract `Consumer.sol` as `currentPrice`.
 
