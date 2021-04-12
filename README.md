@@ -171,6 +171,8 @@ Take note of the Job Id use https://web3-type-converter.onbrn.com/ or a differen
 
 Next, in `testnet-deploy/migrations/3_deploy_consumer.js`, put in the values for `LINKTOKEN_ADDRESS`, `"ORACLE_ADDRESS"` from the previous migrations, and `"YOUR_JOB_ID_IN_HEX"` from the values of the job id converted to bytes32.
 
+Then proceed to deploy the consumer contrat by running `truffle migrate --f 3 --to 3 --network qtum`
+
 ## Making a request
 
 To test out making a request, go inside of `testnet_deploy` and run `truffle exec ./scripts/request.js`, to trigger a jub run.
