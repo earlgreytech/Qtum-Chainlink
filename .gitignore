@@ -1,10 +1,16 @@
 ignored/
 node_modules/
+automated-deployment/src/build
+automated-deployment/src/*.lock
 qtum-initiator/src/.api
+qtum-initiator/src/*.lock
 qtum-initiator/.env-testnet
 qtumtx-adapter/src/.api
 qtumtx-adapter/.env-testnet
+qtumtx-adapter/src/*.lock
 testnet-deploy/.deployerKey
 testnet-deploy/build
 testnet-deploy/package-lock.json
 .api
+*.log
+*.txt

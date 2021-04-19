@@ -10,8 +10,6 @@ const db = require('./db.js');
 require('console-stamp')(console);
 const qtum = require("qtumjs-eth")
 const rpcURL = `http://${process.env.HEX_QTUM_ADDRESS}:@${process.env.JANUS_HOST}:${process.env.JANUS_PORT}`;
-const qtumAccount = url.parse(rpcURL).auth.split(":")[0]
-const rpc = new qtum.EthRPC(rpcURL, qtumAccount)
 const { QtumRPC } = require('qtumjs')
 const qtumConnection = new QtumRPC('http://qtum:testpasswd@qtum:3889')
 // The OracleRequest event ABI for decoding the event logs
@@ -22,7 +20,7 @@ const port = process.env.INITIATOR_PORT || 30055;
 const confirmations = 1;
 
 
-let web3 = new Web3()
+let web3 = new Web3(rpcURL);
 // The Subscriptions array holds the current job/oracle pairs that needs to be watched for events
 let Subscriptions = [];
 
@@ -178,7 +176,7 @@ async function loadSubscriptions() {
    for the specified job ID */
 async function newSubscription(jobId, oracleAddress) {
 	console.info(`Subscribing to Oracle at ${oracleAddress} for requests to job ID ${jobId}...`);
-	let fromBlock = await rpc.getBlockNumber();
+	let fromBlock = await web3.eth.getBlockNumber();
 	let index = 0;
 	// Topics include OracleRequest event signature and hex job Id to wait for logs for the given job
 	const waitForLogsRequest = (from) => qtumConnection.rawCall('waitforlogs', [from, null, { "addresses": [oracleAddress.split('0x')[1]], "topics": ['d8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65', web3.utils.toHex(jobId).split('0x')[1]] }, 1]).then((event) => {
@@ -267,8 +265,8 @@ function setupNetwork(node) {
 	return new Promise(async function (resolve, reject) {
 		console.log(`[INFO] - Waiting for ${node.name} node to be ready, connecting to ${node.url}`);
 		// Checks to see if connection is successful
-		rpc.getBlockNumber().then((value) => {
-			resolve(rpc)
+		web3.eth.getBlockNumber().then((value) => {
+			resolve(web3);
 		}).catch((e) => {
 			console.log(e)
 		})

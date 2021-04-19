@@ -3,6 +3,11 @@ require('dotenv')
 module.exports = {
 	contracts_build_directory: process.env.CONTRACTS_BUILD_DIRECTORY || './build/contracts',
 	networks: {
+		development: {
+			host: "127.0.0.1",
+			port: 8545, // janus QTUM-ETH RPC bridge
+			network_id: '*',
+		},
 		qtum: {
 			host: process.env.JANUS_HOST || "localhost",
 			port: process.env.JANUS_PORT || 23889, // janus QTUM-ETH RPC bridge

@@ -9,16 +9,21 @@
 		"test": "npx truffle test",
 		"deploy:linktoken:qtum": "npx truffle migrate --f 1 --to 2 --network qtum",
 		"deploy:oracle:qtum": "npx truffle migrate --f 3 --to 3 --network qtum",
-		"deploy:consumer:qtum": "npx truffle migrate --f 4 --to 4 --network qtum"
+		"deploy:consumer:qtum": "npx truffle migrate --f 4 --to 4 --network qtum",
+		"deploy:linktoken:dev": "npx truffle migrate --f 1 --to 2 --network development",
+		"deploy:oracle:dev": "npx truffle migrate --f 3 --to 3 --network development",
+		"deploy:consumer:dev": "npx truffle migrate --f 4 --to 4 --network development"
 	},
 	"dependencies": {
+		"@openzeppelin/contracts": "v3.4",
 		"@truffle/contract": "^4.2.3",
 		"@truffle/hdwallet-provider": "^1.0.34",
 		"cbor": "^5.0.2",
 		"chainlink-api-client": "file:../../chainlink-api-client",
+		"dotenv": "8.2.0",
+		"ganache-cli": "^6.12.2",
 		"truffle": "^5.1.23",
-        "web3": "^1.2.7",
-        "dotenv": "8.2.0"
+		"web3": "^1.2.7"
 	},
 	"devDependencies": {
 		"@openzeppelin/test-helpers": "github:OpenZeppelin/openzeppelin-test-helpers",

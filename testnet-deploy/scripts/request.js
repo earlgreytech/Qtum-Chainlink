@@ -16,6 +16,8 @@ module.exports = async function main(callback) {
 
     const request = await consumer.requestQTUMPrice()
 
+    console.log(request)
+
     const currentPrice = await consumer.currentPrice.call();
     console.log(web3.utils.hexToNumber(currentPrice))
     callback(0);
